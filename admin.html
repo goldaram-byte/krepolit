@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>КРЕПОЛИТ — админ-панель</title>
+<style>
+:root{--navy:#0f1b2d;--navy2:#16263d;--accent:#ff6a00;--accent-d:#e85d00;--line:#e4e9f0;
+--muted:#6c7889;--bg:#f4f6fa;--ink:#101623;--ok:#1a9d5a;--danger:#dc2626;--radius:12px;}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit}
+.app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+.side{background:var(--navy);color:#c7d0dc;padding:16px 0;position:sticky;top:0;height:100vh}
+.brand{font-weight:900;font-size:20px;color:#fff;padding:6px 20px 4px}
+.brand i{color:var(--accent);font-style:normal}
+.brand small{display:block;font-size:11px;color:#7d8899;font-weight:500;letter-spacing:.5px;margin-top:2px}
+.nav{margin-top:18px}
+.nav a{display:flex;align-items:center;gap:10px;padding:12px 20px;color:#c7d0dc;font-size:14px;font-weight:600;border-left:3px solid transparent}
+.nav a:hover{background:var(--navy2)}
+.nav a.active{background:var(--navy2);color:#fff;border-left-color:var(--accent)}
+.nav a .b{margin-left:auto;background:var(--accent);color:#fff;border-radius:10px;padding:1px 8px;font-size:11px}
+.foot{padding:14px 20px;margin-top:18px;border-top:1px solid var(--navy2);font-size:12px;color:#7d8899}
+.main{padding:22px 26px;overflow:auto}
+.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.head h2{margin:0;font-size:22px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:20px}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.card b{font-size:26px;display:block}
+.card span{color:var(--muted);font-size:13px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+input[type=text],input[type=number],select{padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:14px;outline:none;background:#fff}
+input[type=text]:focus,select:focus{border-color:var(--accent)}
+.grow{flex:1;min-width:180px}
+.btn{border:none;border-radius:9px;padding:9px 16px;font-weight:700;font-size:14px;background:var(--accent);color:#fff}
+.btn:hover{background:var(--accent-d)}
+.btn.light{background:#fff;color:var(--navy);border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+th{background:var(--navy);color:#fff;text-align:left;padding:10px 12px;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+td{padding:8px 12px;border-top:1px solid var(--line);font-size:14px;vertical-align:middle}
+tr:hover td{background:#fafbfe}
+td input{width:100%;border:1px solid transparent;background:transparent;padding:5px 6px;border-radius:6px}
+td input:focus{border-color:var(--accent);background:#fff}
+td.num input{text-align:right}
+.pag{display:flex;gap:6px;align-items:center;margin-top:14px;flex-wrap:wrap}
+.pag button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:6px 11px;font-size:13px}
+.pag button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600}
+.st-new{background:#e8f0ff;color:#1d4ed8}.st-work{background:#fff3e0;color:#b45309}.st-done{background:#e7f7ee;color:var(--ok)}
+.empty{text-align:center;color:var(--muted);padding:50px 0}
+.note{background:#fff8ef;border:1px solid #ffe0bd;color:#7a5216;padding:11px 14px;border-radius:10px;font-size:13px;margin-bottom:14px}
+.tab{display:none}.tab.on{display:block}
+select.st{padding:4px 8px;border-radius:7px;font-size:12px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">КРЕПО<i>ЛИТ</i><small>АДМИН-ПАНЕЛЬ</small></div>
+    <nav class="nav">
+      <a data-tab="dash" class="active">📊 Обзор</a>
+      <a data-tab="catalog">📦 Каталог <span class="b" id="nCat">0</span></a>
+      <a data-tab="leads">📩 Заявки <span class="b" id="nLead">0</span></a>
+      <a data-tab="help">❓ Как устроено</a>
+    </nav>
+    <div class="foot">Статический сайт.<br>Данные — <code style="color:#9fb0c4">assets/products.js</code></div>
+  </aside>
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <section class="tab on" id="tab-dash">
+      <div class="head"><h2>Обзор каталога</h2></div>
+      <div class="cards">
+        <div class="card"><b id="cGroups">—</b><span>групп</span></div>
+        <div class="card"><b id="cSubs">—</b><span>подгрупп</span></div>
+        <div class="card"><b id="cProds">—</b><span>товаров (SKU)</span></div>
+        <div class="card"><b id="cAvg">—</b><span>средняя цена</span></div>
+        <div class="card"><b id="cLeads">—</b><span>заявок</span></div>
+      </div>
+      <table><thead><tr><th>Группа</th><th>Подгрупп</th><th>Товаров</th><th>Мин. цена</th><th>Макс. цена</th></tr></thead>
+      <tbody id="dashRows"></tbody></table>
+    </section>
+
+    <!-- CATALOG -->
+    <section class="tab" id="tab-catalog">
+      <div class="head"><h2>Каталог товаров</h2>
+        <button class="btn" id="exportBtn">⬇ Экспорт products.js</button></div>
+      <div class="note">Цены и наименования можно править прямо в таблице. После правок нажмите <b>«Экспорт products.js»</b> — скачается обновлённый файл, положите его в <code>assets/products.js</code> репозитория (замените старый) и запушьте. Сайт подхватит цены автоматически.</div>
+      <div class="toolbar">
+        <input type="text" class="grow" id="search" placeholder="Поиск: наименование или артикул…">
+        <select id="fGroup"><option value="">Все группы</option></select>
+        <span id="found" style="color:var(--muted);font-size:13px"></span>
+      </div>
+      <table><thead><tr><th style="width:44%">Наименование</th><th>Артикул</th><th>Группа</th><th>Ед.</th><th style="width:110px">Цена, ₽</th></tr></thead>
+      <tbody id="catRows"></tbody></table>
+      <div class="pag" id="pag"></div>
+    </section>
+
+    <!-- LEADS -->
+    <section class="tab" id="tab-leads">
+      <div class="head"><h2>Заявки от клиентов</h2>
+        <div style="display:flex;gap:8px"><button class="btn light" id="leadDemo">+ Демо-заявка</button><button class="btn light" id="leadClear">Очистить</button></div></div>
+      <div class="note">Заявки с сайта («Оставить заявку», «Получить прайс») сохраняются в браузере (<code>localStorage</code>) — видны на этом же устройстве. Для сбора заявок с любых устройств нужен backend (могу подключить отдельно).</div>
+      <table><thead><tr><th>Дата</th><th>Имя</th><th>Телефон</th><th>Комментарий</th><th>Статус</th><th></th></tr></thead>
+      <tbody id="leadRows"></tbody></table>
+      <div class="empty" id="leadEmpty" hidden>Пока нет заявок.</div>
+    </section>
+
+    <!-- HELP -->
+    <section class="tab" id="tab-help">
+      <div class="head"><h2>Как устроена админка</h2></div>
+      <div class="card" style="max-width:760px;line-height:1.6">
+        <p><b>Это статический сайт</b> — без сервера и базы данных. Весь каталог лежит в файле <code>assets/products.js</code> (объект <code>window.KATALOG</code>: группы, подгруппы, товары с ценами).</p>
+        <p><b>Обзор</b> — сводка по каталогу.</p>
+        <p><b>Каталог</b> — просмотр, поиск и правка наименований/цен. Правки живут в браузере; чтобы они попали на сайт — «Экспорт products.js» → заменить файл в репозитории → запушить.</p>
+        <p><b>Заявки</b> — заявки, оставленные на этом устройстве. Для полноценного приёма заявок (с воронкой, статусами, доступом с телефона) нужен backend — это отдельный шаг.</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="assets/products.js"></script>
+<script>
+const K = (window.KATALOG)||{groups:[],subs:[],products:[]};
+const GN = Object.fromEntries(K.groups.map(g=>[g.id,g.name]));
+const money = n=>{n=Number(n)||0;let f=n%1?2:0;let a=n.toFixed(f).split('.');a[0]=a[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ');return a[0]+(a[1]?','+a[1]:'');};
+// product tuple: [id,g,s,name,art,unit,price,w,img]
+const PROD = K.products;
+
+// ---- tabs ----
+document.querySelectorAll('.nav a').forEach(a=>a.onclick=()=>{
+  document.querySelectorAll('.nav a').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  a.classList.add('active'); document.getElementById('tab-'+a.dataset.tab).classList.add('on');
+});
+
+// ---- dashboard ----
+function dash(){
+  const byg={};
+  for(const p of PROD){const g=p[1];(byg[g]=byg[g]||[]).push(p[6]);}
+  document.getElementById('cGroups').textContent=K.groups.length;
+  document.getElementById('cSubs').textContent=K.subs.length;
+  document.getElementById('cProds').textContent=PROD.length.toLocaleString('ru-RU');
+  const avg=PROD.reduce((s,p)=>s+(+p[6]||0),0)/(PROD.length||1);
+  document.getElementById('cAvg').textContent=money(avg)+' ₽';
+  const rows=K.groups.map(g=>{const arr=byg[g.id]||[];const subs=K.subs.filter(s=>s.g===g.id).length;
+    const mn=arr.length?Math.min(...arr):0,mx=arr.length?Math.max(...arr):0;
+    return `<tr><td>${g.name}</td><td>${subs}</td><td>${arr.length}</td><td>${money(mn)} ₽</td><td>${money(mx)} ₽</td></tr>`;}).join('');
+  document.getElementById('dashRows').innerHTML=rows;
+  document.getElementById('nCat').textContent=PROD.length;
+}
+
+// ---- catalog (search + paginate + edit) ----
+let filtered=PROD, page=1, PER=50;
+const gsel=document.getElementById('fGroup');
+K.groups.forEach(g=>{const o=document.createElement('option');o.value=g.id;o.textContent=g.name;gsel.appendChild(o);});
+function applyFilter(){
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  const g=gsel.value;
+  filtered=PROD.filter(p=>(!g||p[1]===g)&&(!q||p[3].toLowerCase().includes(q)||String(p[4]).toLowerCase().includes(q)));
+  page=1; renderCat();
+}
+function renderCat(){
+  const total=filtered.length, pages=Math.max(1,Math.ceil(total/PER));
+  page=Math.min(page,pages);
+  const slice=filtered.slice((page-1)*PER,page*PER);
+  document.getElementById('found').textContent=total.toLocaleString('ru-RU')+' поз.';
+  document.getElementById('catRows').innerHTML=slice.map(p=>{
+    const i=PROD.indexOf(p);
+    return `<tr><td><input value="${(p[3]||'').replace(/"/g,'&quot;')}" data-i="${i}" data-f="3"></td>
+      <td style="color:var(--muted);font-size:12px">${p[4]||''}</td><td>${GN[p[1]]||p[1]}</td><td>${p[5]||''}</td>
+      <td class="num"><input type="number" step="0.01" value="${p[6]}" data-i="${i}" data-f="6"></td></tr>`;}).join('');
+  document.querySelectorAll('#catRows input').forEach(inp=>inp.onchange=()=>{
+    const i=+inp.dataset.i,f=+inp.dataset.f; PROD[i][f]=f===6?(parseFloat(inp.value)||0):inp.value;});
+  // pagination
+  let html=''; const win=2;
+  for(let n=1;n<=pages;n++){ if(n===1||n===pages||Math.abs(n-page)<=win){html+=`<button class="${n===page?'on':''}" data-p="${n}">${n}</button>`;}
+    else if(Math.abs(n-page)===win+1){html+='<span style="color:var(--muted)">…</span>';}}
+  const pg=document.getElementById('pag'); pg.innerHTML=html;
+  pg.querySelectorAll('button').forEach(b=>b.onclick=()=>{page=+b.dataset.p;renderCat();window.scrollTo(0,0);});
+}
+document.getElementById('search').oninput=applyFilter;
+gsel.onchange=applyFilter;
+
+// ---- export products.js ----
+document.getElementById('exportBtn').onclick=()=>{
+  const data='window.KATALOG='+JSON.stringify(K)+';';
+  const blob=new Blob([data],{type:'application/javascript'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='products.js';a.click();
+};
+
+// ---- leads (localStorage) ----
+const LKEY='krepolit_leads';
+function leads(){try{return JSON.parse(localStorage.getItem(LKEY)||'[]');}catch(e){return[];}}
+function saveLeads(a){localStorage.setItem(LKEY,JSON.stringify(a));}
+function renderLeads(){
+  const a=leads(); document.getElementById('nLead').textContent=a.length;
+  document.getElementById('cLeads').textContent=a.length;
+  document.getElementById('leadEmpty').hidden=a.length>0;
+  document.getElementById('leadRows').innerHTML=a.map((l,i)=>{
+    const st=l.status||'new'; const cls={new:'st-new',work:'st-work',done:'st-done'}[st];
+    const lbl={new:'Новая',work:'В работе',done:'Закрыта'};
+    return `<tr><td>${l.date||''}</td><td>${l.name||''}</td><td>${l.phone||''}</td><td>${l.msg||''}</td>
+      <td><select class="st ${cls}" data-i="${i}"><option value="new"${st=='new'?' selected':''}>Новая</option>
+      <option value="work"${st=='work'?' selected':''}>В работе</option><option value="done"${st=='done'?' selected':''}>Закрыта</option></select></td>
+      <td><button class="btn light" data-del="${i}">✕</button></td></tr>`;}).join('');
+  document.querySelectorAll('#leadRows select').forEach(s=>s.onchange=()=>{const a=leads();a[+s.dataset.i].status=s.value;saveLeads(a);renderLeads();});
+  document.querySelectorAll('#leadRows [data-del]').forEach(b=>b.onclick=()=>{const a=leads();a.splice(+b.dataset.del,1);saveLeads(a);renderLeads();});
+}
+document.getElementById('leadDemo').onclick=()=>{const a=leads();a.unshift({date:new Date().toLocaleString('ru-RU'),name:'Иван Петров',phone:'+7 999 123-45-67',msg:'Прайс на анкеры',status:'new'});saveLeads(a);renderLeads();};
+document.getElementById('leadClear').onclick=()=>{if(confirm('Удалить все заявки?')){saveLeads([]);renderLeads();}};
+
+dash(); applyFilter(); renderLeads();
+</script>
+</body>
+</html>
