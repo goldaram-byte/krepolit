@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Товар — КРЕПОЛИТ</title>
+<meta name="description" content="Карточка товара интернет-магазина крепежа и метизов КРЕПОЛИТ.">
+<meta name="theme-color" content="#0f1b2d">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="crumb"><div class="wrap" id="crumb"></div></div>
+
+<section style="padding-top:26px">
+  <div class="wrap" id="pdp-root"></div>
+</section>
+
+<section style="padding-top:0" id="related-sec" hidden>
+  <div class="wrap">
+    <h2 class="sec-title">Похожие товары</h2>
+    <p class="sec-sub" id="related-sub"></p>
+    <div class="prodgrid" id="related"></div>
+  </div>
+</section>
+
+<script src="assets/products.js"></script>
+<script src="assets/app.js"></script>
+<script>
+initChrome();
+const id = +qs('id');
+const p = PBYID[id];
+const root = document.getElementById('pdp-root');
+
+if(!p){
+  document.getElementById('crumb').innerHTML = `<a href="index.html">Главная</a><span class="sep">/</span><a href="catalog.html">Каталог</a><span class="sep">/</span><b>Товар не найден</b>`;
+  root.innerHTML = `<div class="empty" style="padding:70px 0"><h2>Товар не найден</h2><p style="margin:10px 0 20px">Возможно, он снят с продажи или ссылка устарела.</p><a class="btn btn-accent" href="catalog.html">Вернуться в каталог</a></div>`;
+} else {
+  document.title = p.name + ' — КРЕПОЛИТ';
+  document.getElementById('crumb').innerHTML =
+    `<a href="index.html">Главная</a><span class="sep">/</span><a href="catalog.html">Каталог</a><span class="sep">/</span><a href="catalog.html?group=${p.g}">${GNAME[p.g]}</a>${p.s?`<span class="sep">/</span><a href="catalog.html?sub=${p.s}">${SNAME[p.s]}</a>`:''}<span class="sep">/</span><b>${p.name}</b>`;
+
+  const priceHtml = `${p.old?'<s>'+fmt(p.old)+'</s>':''}${fmt(p.price)} ₽ <small>/ ${p.unit}</small>`;
+  const oldHtml = p.old? `<div class="bb-old">Экономия ${fmt(p.old-p.price)} ₽ (−${Math.round((1-p.price/p.old)*100)}%)</div>`:'';
+  const specs = [
+    ['Артикул', p.art],
+    ['Группа', GNAME[p.g]],
+    ['Подгруппа', SNAME[p.s]||''],
+    ['Единица измерения', p.unit],
+    ['Вес 1 шт', p.w ? (p.w+' кг') : ''],
+    ['Наличие', 'В наличии на складе'],
+    ['Минимальная партия', p.unit==='кг'?'от 1 кг':(p.unit==='упак'?'от 1 упаковки':'от 1 '+p.unit)],
+  ].filter(r=>r[1] && r[1]!=='—').map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('');
+
+  root.innerHTML = `
+  <div class="pdp">
+    <div class="pdp-gallery">
+      <div class="pdp-main-img">${tagHtml(p)}<svg viewBox="0 0 48 48"><use href="#${CICON[p.cat]}"/></svg></div>
+      <div class="pdp-thumbs"><div class="on"><svg viewBox="0 0 48 48"><use href="#${CICON[p.cat]}"/></svg></div><div><svg viewBox="0 0 48 48"><use href="#i-bolt"/></svg></div><div><svg viewBox="0 0 48 48"><use href="#i-washer"/></svg></div></div>
+    </div>
+    <div class="pdp-info">
+      <h1>${p.name}</h1>
+      <div class="pdp-meta"><span>Арт. <b>${p.art}</b></span><span class="instock">● В наличии</span><span>${GNAME[p.g]}</span></div>
+      <div class="buybox">
+        <div class="bb-price">${priceHtml}</div>
+        ${oldHtml}
+        <div class="bb-row">
+          <div class="qty"><button id="q-minus">−</button><span id="q-val">1</span><button id="q-plus">+</button></div>
+          <button class="btn btn-accent" id="buy">В корзину</button>
+        </div>
+        <div class="bb-note"><svg viewBox="0 0 24 24" fill="none"><path d="M3 13h11V6H3v7zm11-4h4l3 3v4h-7V9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="7" cy="17" r="2" stroke="currentColor" stroke-width="1.8"/><circle cx="17" cy="17" r="2" stroke="currentColor" stroke-width="1.8"/></svg>Доставка по Москве от 490 ₽, бесплатно от 30 000 ₽. Доставка по России ТК.</div>
+        <div class="bb-note"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Сертификаты ГОСТ / DIN. Оптовым клиентам — индивидуальные цены.</div>
+        <div style="margin-top:14px"><button class="btn btn-light" style="width:100%;justify-content:center" data-modal="price">Запросить оптовую цену</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tabnav"><button class="on" data-tab="desc">Описание</button><button data-tab="spec">Характеристики</button><button data-tab="pay">Доставка и оплата</button></div>
+    <div class="tabpane on" id="tab-desc">
+      <p><b>${p.name}</b> — ${p.desc}. Применяется для монтажных, строительных и производственных работ. Продукция сертифицирована и всегда есть на складе КРЕПОЛИТ в Москве.</p>
+      <p>Отгружаем оптом и в розницу. Для оптовых заказов действуют специальные цены и отсрочка платежа — уточните у менеджера по телефону 8 800 555-24-70.</p>
+    </div>
+    <div class="tabpane" id="tab-spec"><table class="spectable"><tbody>${specs}</tbody></table></div>
+    <div class="tabpane" id="tab-pay">
+      <p><b>Доставка:</b> по Москве собственным транспортом от 490 ₽ (бесплатно при заказе от 30 000 ₽), по России — транспортными компаниями. Самовывоз со склада на ул. Складочная, 12.</p>
+      <p><b>Оплата:</b> наличными, картой, безналичный расчёт с НДС. Для юридических лиц — отсрочка платежа до 30 дней.</p>
+    </div>
+  </div>`;
+
+  // qty + buy
+  let q = 1;
+  const qval = document.getElementById('q-val');
+  document.getElementById('q-minus').onclick = ()=>{ q=Math.max(1,q-1); qval.textContent=q; };
+  document.getElementById('q-plus').onclick = ()=>{ q++; qval.textContent=q; };
+  document.getElementById('buy').onclick = ()=>{ addToCart(p.id,q); };
+  // tabs
+  document.querySelectorAll('.tabnav button').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('.tabnav button').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.tabpane').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); document.getElementById('tab-'+b.dataset.tab).classList.add('on');
+  });
+  // related
+  const rel = P.filter(x=>x.s===p.s && x.id!==p.id).slice(0,4);
+  const relList = rel.length?rel:P.filter(x=>x.g===p.g && x.id!==p.id).slice(0,4);
+  document.getElementById('related-sec').hidden = false;
+  document.getElementById('related-sub').textContent = p.s ? ('Из подгруппы «'+SNAME[p.s]+'»') : ('Из группы «'+GNAME[p.g]+'»');
+  document.getElementById('related').innerHTML = relList.map(productCard).join('');
+  window.PAGE_REFRESH = ()=>{ document.getElementById('related').innerHTML = relList.map(productCard).join(''); };
+}
+</script>
+</body>
+</html>

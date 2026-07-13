@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://krepolit.ru/sitemap.xml

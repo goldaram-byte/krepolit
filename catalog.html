@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Каталог крепежа и метизов — КРЕПОЛИТ</title>
+<meta name="description" content="Каталог крепежа и метизов КРЕПОЛИТ: болты, винты, гайки, шайбы, саморезы, анкеры, дюбели, шпильки, такелаж, заклёпки, хомуты и др. Более 6000 позиций, оптовые и розничные цены.">
+<meta name="theme-color" content="#0f1b2d">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="crumb"><div class="wrap" id="crumb"></div></div>
+<div class="wrap page-head"><h1 id="page-title">Каталог</h1><p id="page-sub"></p></div>
+
+<section style="padding-top:22px">
+  <div class="wrap">
+    <div class="mobcats"><div class="chips" id="chips"></div></div>
+    <div class="cat-layout">
+      <aside class="side">
+        <h4>Категории</h4>
+        <div id="side-list"></div>
+      </aside>
+      <div id="main"></div>
+    </div>
+  </div>
+</section>
+
+<script src="assets/products.js"></script>
+<script src="assets/app.js"></script>
+<script>
+initChrome('catalog');
+
+const PER = 24;
+let curSub   = qs('sub') || '';
+let curGroup = qs('group') || (curSub ? (SBYID[curSub] ? SBYID[curSub].g : '') : '');
+let curQ     = (qs('q') || '').trim();
+if(curQ){ curSub=''; curGroup=''; }
+let page = Math.max(1, parseInt(qs('p')||'1',10) || 1);
+let sortMode = 'name';
+
+function plural(n){ const a=Math.abs(n)%100,b=n%10; if(a>10&&a<20)return'товаров'; if(b>1&&b<5)return'товара'; if(b===1)return'товар'; return'товаров'; }
+function baseProducts(){
+  if(curQ){ const v=curQ.toLowerCase(); return P.filter(p=>p.name.toLowerCase().includes(v)||p.art.toLowerCase().includes(v)||GNAME[p.g].toLowerCase().includes(v)); }
+  if(curSub)   return P.filter(p=>p.s===curSub);
+  if(curGroup) return P.filter(p=>p.g===curGroup);
+  return [];
+}
+function sortList(list){
+  const a=list.slice();
+  if(sortMode==='asc') a.sort((x,y)=>x.price-y.price);
+  else if(sortMode==='desc') a.sort((x,y)=>y.price-x.price);
+  else a.sort((x,y)=>x.name.localeCompare(y.name,'ru'));
+  return a;
+}
+
+/* --- sidebar --- */
+function renderSide(){
+  let html = `<a href="catalog.html" class="${!curGroup&&!curSub&&!curQ?'active':''}">Все группы<em>${P.length}</em></a>`;
+  GROUPS.forEach(g=>{
+    const on = g.id===curGroup;
+    html += `<a href="catalog.html?group=${g.id}" class="${on&&!curSub?'active':''}">${g.name}<em>${GCOUNT[g.id]||0}</em></a>`;
+    if(on){
+      (SUBSBYG[g.id]||[]).forEach(s=>{
+        html += `<a href="catalog.html?sub=${s.id}" class="sub-link ${s.id===curSub?'active':''}">${s.name}<em>${SCOUNT[s.id]||0}</em></a>`;
+      });
+    }
+  });
+  document.getElementById('side-list').innerHTML = html;
+  document.getElementById('chips').innerHTML =
+    `<a class="chip ${!curGroup&&!curSub&&!curQ?'active':''}" href="catalog.html">Все</a>` +
+    GROUPS.map(g=>`<a class="chip ${g.id===curGroup?'active':''}" href="catalog.html?group=${g.id}">${g.name}</a>`).join('');
+}
+
+/* --- head --- */
+function renderHead(){
+  const cr=document.getElementById('crumb');
+  let title,sub,tail;
+  if(curQ){ title='Результаты поиска'; sub='По запросу «'+curQ+'»'; tail='<span class="sep">/</span><b>Поиск</b>'; }
+  else if(curSub){ const g=SBYID[curSub].g; title=SNAME[curSub]; sub='Группа: '+GNAME[g]; tail=`<span class="sep">/</span><a href="catalog.html">Каталог</a><span class="sep">/</span><a href="catalog.html?group=${g}">${GNAME[g]}</a><span class="sep">/</span><b>${title}</b>`; }
+  else if(curGroup){ title=GNAME[curGroup]; sub=(GCOUNT[curGroup]||0)+' '+plural(GCOUNT[curGroup]||0)+' в '+((SUBSBYG[curGroup]||[]).length)+' подгруппах'; tail=`<span class="sep">/</span><a href="catalog.html">Каталог</a><span class="sep">/</span><b>${title}</b>`; }
+  else { title='Каталог'; sub=`${GROUPS.length} групп · ${P.length.toLocaleString('ru-RU')} позиций`; tail='<span class="sep">/</span><b>Каталог</b>'; }
+  document.getElementById('page-title').textContent=title;
+  document.getElementById('page-sub').textContent=sub||'';
+  document.title=title+' — КРЕПОЛИТ';
+  cr.innerHTML=`<a href="index.html">Главная</a>${tail}`;
+}
+
+/* --- main --- */
+function groupTiles(){
+  return `<div class="catgrid">`+GROUPS.map(g=>`<a class="catcard" href="catalog.html?group=${g.id}"><div class="ci"><svg viewBox="0 0 48 48"><use href="#${g.icon}"/></svg></div><h3>${g.name}</h3><span>${GCOUNT[g.id]||0} ${plural(GCOUNT[g.id]||0)}</span><span class="arw">Смотреть <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>`).join('')+`</div>`;
+}
+function subTiles(gid){
+  const subs=SUBSBYG[gid]||[]; if(!subs.length) return '';
+  return `<div class="subtiles">`+subs.map(s=>`<a href="catalog.html?sub=${s.id}"><span>${s.name}</span><em>${SCOUNT[s.id]||0}</em></a>`).join('')+`</div>`;
+}
+function pager(total){
+  const pages=Math.ceil(total/PER); if(pages<=1) return '';
+  let btns='';
+  const win=2;
+  const add=(n,label,dis,act)=>{ btns+=`<button class="pg-btn ${act?'act':''}" ${dis?'disabled':''} onclick="goPage(${n})">${label||n}</button>`; };
+  add(page-1,'‹',page===1);
+  const from=Math.max(1,page-win), to=Math.min(pages,page+win);
+  if(from>1){ add(1); if(from>2) btns+='<span class="pg-dots">…</span>'; }
+  for(let i=from;i<=to;i++) add(i,null,false,i===page);
+  if(to<pages){ if(to<pages-1) btns+='<span class="pg-dots">…</span>'; add(pages); }
+  add(page+1,'›',page===pages);
+  return `<div class="pager">${btns}</div>`;
+}
+function renderMain(){
+  const main=document.getElementById('main');
+  // landing: no selection
+  if(!curGroup && !curSub && !curQ){ main.innerHTML=groupTiles(); return; }
+  const list=sortList(baseProducts());
+  const total=list.length;
+  const pages=Math.max(1,Math.ceil(total/PER));
+  if(page>pages) page=pages;
+  const slice=list.slice((page-1)*PER, page*PER);
+  let head='';
+  if(curGroup && !curSub && !curQ) head=subTiles(curGroup);
+  const toolbar=`<div class="cat-toolbar"><span class="cnt-txt">${total?total+' '+plural(total):''}</span><label>Сортировка:
+    <select id="sort"><option value="name">по названию</option><option value="asc"${sortMode==='asc'?' selected':''}>сначала дешёвые</option><option value="desc"${sortMode==='desc'?' selected':''}>сначала дорогие</option></select></label></div>`;
+  const grid = total ? `<div class="prodgrid">${slice.map(productCard).join('')}</div>`
+                     : `<div class="empty">Ничего не найдено. Позвоните 8 800 555-24-70 — подберём вручную.</div>`;
+  main.innerHTML = head + toolbar + grid + pager(total);
+  const sel=document.getElementById('sort');
+  if(sel) sel.addEventListener('change',()=>{ sortMode=sel.value; page=1; renderMain(); });
+}
+window.goPage=function(n){ page=n; renderMain(); const u=new URL(location); u.searchParams.set('p',n); history.replaceState(null,'',u); document.querySelector('.page-head').scrollIntoView({behavior:'smooth',block:'start'}); };
+
+renderHead(); renderSide(); renderMain();
+window.PAGE_REFRESH = renderMain;
+</script>
+</body>
+</html>

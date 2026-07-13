@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Новости — КРЕПОЛИТ</title>
+<meta name="description" content="Новости компании КРЕПОЛИТ: пополнения ассортимента крепежа и метизов, изменения цен, акции и события.">
+<meta name="theme-color" content="#0f1b2d">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="crumb"><div class="wrap"><a href="index.html">Главная</a><span class="sep">/</span><b>Новости</b></div></div>
+<div class="wrap page-head"><h1>Новости</h1><p>Пополнения ассортимента и события компании</p></div>
+
+<section style="padding-top:22px"><div class="wrap">
+  <div class="newsgrid" id="news"></div>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap"><div class="callback"><div class="cb-in">
+  <div><h3>Хотите узнавать о новинках и акциях?</h3><p>Оставьте контакт — пришлём свежий прайс и сообщим о пополнениях склада и скидках.</p></div>
+  <div><form data-form="Подписка на новости"><div class="form-row"><input type="text" placeholder="Ваше имя" required><input type="email" placeholder="E-mail" required></div><button class="btn btn-accent" style="width:100%;justify-content:center;margin-top:12px">Подписаться</button><div class="agree">Нажимая кнопку, вы соглашаетесь с политикой обработки персональных данных.</div></form></div>
+</div></div></div></section>
+
+<script src="assets/products.js"></script>
+<script src="assets/app.js"></script>
+<script>
+initChrome();
+const NEWS = [
+  {d:'2 июля 2026', t:'Пополнили склад анкерным крепежом', x:'Более 400 новых позиций: клиновые, забивные и химические анкеры Fischer и Sormat. Всё в наличии, доступны оптовые цены.', ic:'i-anchor', bg:'linear-gradient(135deg,#1f3a5f,#0f1b2d)', c:'#ff8a3c'},
+  {d:'18 июня 2026', t:'Снизили цены на кровельные саморезы', x:'Заключили прямой контракт с заводом-изготовителем — цены на саморезы с EPDM-шайбой снижены до 15%.', ic:'i-selftap', bg:'linear-gradient(135deg,#ff6a00,#ff9145)', c:'#fff'},
+  {d:'30 мая 2026', t:'Новый раздел: межвенцовый утеплитель', x:'Добавили джут, лён и льноватин для деревянного домостроения — оптом напрямую от производителя.', ic:'i-insul', bg:'linear-gradient(135deg,#1a9d5a,#12784a)', c:'#fff'},
+  {d:'12 мая 2026', t:'Расширили ассортимент такелажа', x:'Карабины, талрепы, цепи, тросы и зажимы по стандартам DIN — новые типоразмеры на складе.', ic:'i-rigging', bg:'linear-gradient(135deg,#334d6e,#1f3a5f)', c:'#c7d3e2'},
+  {d:'28 апреля 2026', t:'Отсрочка платежа до 30 дней', x:'Для постоянных оптовых клиентов увеличили срок отсрочки платежа и упростили работу по договору.', ic:'i-nut', bg:'linear-gradient(135deg,#ff6a00,#e85d00)', c:'#fff'},
+  {d:'3 апреля 2026', t:'Запустили обновлённый склад 2 400 м²', x:'Переехали в новый складской комплекс — больше товара в наличии и быстрее сборка заказов.', ic:'i-bolt', bg:'linear-gradient(135deg,#1f3a5f,#0f1b2d)', c:'#ff8a3c'},
+];
+document.getElementById('news').innerHTML = NEWS.map(n=>`
+  <article class="ncard"><div class="nimg" style="background:${n.bg}"><svg width="60" height="60" viewBox="0 0 48 48" style="color:${n.c}"><use href="#${n.ic}"/></svg></div>
+  <div class="nbody"><div class="nd">${n.d}</div><h4>${n.t}</h4><p>${n.x}</p></div></article>`).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# Секреты и переменные окружения
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Зависимости и сборка
+node_modules/
+dist/
+
+# Системное
+.DS_Store
+Thumbs.db
