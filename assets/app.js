@@ -207,7 +207,14 @@ function initChrome(active){
   });
   document.addEventListener('submit',e=>{
     const sf=e.target.closest('[data-search]'); if(sf){ e.preventDefault(); const v=sf.querySelector('input').value.trim(); location.href='catalog.html?q='+encodeURIComponent(v); return; }
-    const ff=e.target.closest('[data-form]'); if(ff){ e.preventDefault(); const ctx=ff.dataset.form; if(ctx==='Оформление заказа'){ CART={}; saveCart(); updateBadge(); } formOk(ctx); if(window.PAGE_REFRESH) window.PAGE_REFRESH(); return; }
+    const ff=e.target.closest('[data-form]'); if(ff){ e.preventDefault(); const ctx=ff.dataset.form;
+      const inp=[...ff.querySelectorAll('input,textarea')];
+      const val=t=>{ const x=inp.find(i=>i.type===t); return x?x.value.trim():''; };
+      const payload={ source:ctx, name:val('text'), phone:val('tel'), email:val('email'), message:ctx };
+      if(ctx==='Оформление заказа'){ payload.items=Object.entries(CART).map(([id,q])=>{const p=PBYID[id];return p?{name:p.name,art:p.art,price:p.price,qty:q,unit:p.unit}:null;}).filter(Boolean); CART={}; saveCart(); updateBadge(); }
+      // отправляем заявку в CRM (если backend доступен); при статике — тихо игнорируем
+      fetch('/api/public/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
+      formOk(ctx); if(window.PAGE_REFRESH) window.PAGE_REFRESH(); return; }
   });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeCart(); closeMenu(); closeModal(); const s=el('search-sug'); if(s) s.classList.remove('open'); } });
 

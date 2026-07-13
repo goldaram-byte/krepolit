@@ -64,4 +64,26 @@ r.delete('/:id/image', auth, require('catalog'), (req, res) => {
   res.json({ ok: true });
 });
 
+// Галерея: несколько дополнительных фото товара
+r.get('/:id/gallery', (req, res) => {
+  const main = db.prepare('SELECT image FROM products WHERE id=?').get(req.params.id);
+  const g = db.prepare('SELECT id,file FROM product_images WHERE product_id=? ORDER BY sort,id').all(req.params.id);
+  res.json({ main: main?.image ? '/uploads/' + main.image : null,
+    gallery: g.map(x => ({ id: x.id, url: '/uploads/' + x.file })) });
+});
+
+r.post('/:id/gallery', auth, require('catalog'), upload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Файл не получен' });
+  if (!db.prepare('SELECT id FROM products WHERE id=?').get(req.params.id)) return res.status(404).json({ error: 'Товар не найден' });
+  const id = db.prepare('INSERT INTO product_images(product_id,file) VALUES(?,?)').run(req.params.id, req.file.filename).lastInsertRowid;
+  res.json({ ok: true, id, url: '/uploads/' + req.file.filename });
+});
+
+r.delete('/gallery/:imgId', auth, require('catalog'), (req, res) => {
+  const img = db.prepare('SELECT file FROM product_images WHERE id=?').get(req.params.imgId);
+  if (img) { try { fs.unlinkSync(path.join(UP, img.file)); } catch {} }
+  db.prepare('DELETE FROM product_images WHERE id=?').run(req.params.imgId);
+  res.json({ ok: true });
+});
+
 export default r;

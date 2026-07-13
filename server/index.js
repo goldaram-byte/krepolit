@@ -9,6 +9,10 @@ import dealR from './routes/deals.js';
 import ordR from './routes/orders.js';
 import prodR from './routes/products.js';
 import repR from './routes/reports.js';
+import pubR from './routes/public.js';
+import taskR from './routes/tasks.js';
+import actR from './routes/activities.js';
+import expR from './routes/export.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -23,6 +27,10 @@ app.use('/api/deals', dealR);
 app.use('/api/orders', ordR);
 app.use('/api/products', prodR);
 app.use('/api/reports', repR);
+app.use('/api/public', pubR);
+app.use('/api/tasks', taskR);
+app.use('/api/activities', actR);
+app.use('/api/export', expR);
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 // Загруженные фото товаров

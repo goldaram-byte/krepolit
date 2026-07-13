@@ -118,16 +118,18 @@ function renderLogin(err='') {
 }
 
 // ---------- SHELL ----------
+let BADGE = { open:0, overdue:0 };
 const NAV = [
   { id:'dash', label:'Дашборд', icon:'📊', show:()=>can('reports') },
   { id:'funnel', label:'Воронка', icon:'🔻', show:()=>true },
   { id:'orders', label:'Заказы', icon:'🧾', show:()=>true },
   { id:'clients', label:'Клиенты', icon:'👥', show:()=>true },
+  { id:'tasks', label:'Задачи', icon:'✅', show:()=>true, badge:()=>BADGE.open },
   { id:'catalog', label:'Каталог', icon:'📦', show:()=>true },
   { id:'staff', label:'Сотрудники', icon:'🛡️', show:()=>can('employees') },
 ];
 function shell() {
-  const items = NAV.filter(n=>n.show()).map(n=>`<a data-v="${n.id}" class="${VIEW===n.id?'on':''}">${n.icon} ${n.label}</a>`).join('');
+  const items = NAV.filter(n=>n.show()).map(n=>{const bc=n.badge?n.badge():0;return `<a data-v="${n.id}" class="${VIEW===n.id?'on':''}">${n.icon} ${n.label}${bc?`<span class="b">${bc}</span>`:''}</a>`;}).join('');
   $('#root').innerHTML = `<div class="app">
     <aside class="side"><div class="brand">КРЕПО<i>ЛИТ</i><small>CRM</small></div>
       <nav class="nav">${items}</nav>
@@ -138,7 +140,8 @@ function shell() {
   $('#logout').onclick = async ()=>{ await api('/auth/logout',{method:'POST'}); ME=null; renderLogin(); };
   route();
 }
-function route(){ ({dash:vDash,funnel:vFunnel,orders:vOrders,clients:vClients,catalog:vCatalog,staff:vStaff}[VIEW]||vFunnel)(); }
+function route(){ ({dash:vDash,funnel:vFunnel,orders:vOrders,clients:vClients,tasks:vTasks,catalog:vCatalog,staff:vStaff}[VIEW]||vFunnel)(); }
+async function refreshBadge(){ try{ BADGE=await api('/tasks/badge'); document.querySelectorAll('.nav a').forEach(a=>{ if(a.dataset.v==='tasks'){ const n=NAV.find(x=>x.id==='tasks'); a.innerHTML=`✅ Задачи${BADGE.open?`<span class="b">${BADGE.open}</span>`:''}`; }}); }catch{} }
 const mgrOptions = (sel) => `<option value="">— менеджер —</option>` +
   EMPLOYEES.map(e=>`<option value="${e.id}" ${sel==e.id?'selected':''}>${esc(e.name)}</option>`).join('');
 
@@ -177,7 +180,7 @@ async function vFunnel(){
     const list=deals.filter(d=>d.stage===st);
     const sum=list.reduce((s,d)=>s+(+d.amount||0),0);
     return `<div class="col"><h4>${lbl}</h4><div class="sum">${list.length} · ${money(sum)}</div>${
-      list.map(d=>`<div class="deal"><b>${esc(d.title)}</b>
+      list.map(d=>`<div class="deal"><b>${esc(d.title)} ${d.source==='сайт'?'<span class="badge st-new" style="font-size:10px">🌐 сайт</span>':''}</b>
         <div class="m">${esc(d.client||'—')} · ${money(d.amount)}</div>
         <div class="m">👤 ${esc(d.manager||'—')}</div>
         <select data-move="${d.id}">${STAGES.map(([s2,l2])=>`<option value="${s2}" ${s2===st?'selected':''}>${l2}</option>`).join('')}</select>
@@ -198,7 +201,10 @@ async function dealForm(d){
       <div class="f"><label>Сумma, ₽</label><input type="number" id="da" value="${d?d.amount:0}"></div>
       <div class="f"><label>Этап</label><select id="ds">${STAGES.map(([s,l])=>`<option value="${s}" ${d&&d.stage===s?'selected':''}>${l}</option>`).join('')}</select></div>
       <div class="f full"><label>Заметка</label><textarea id="dn">${d?esc(d.note||''):''}</textarea></div></div>
-    <div class="right"><button class="btn light" onclick="closeModal()">Отмена</button><button class="btn" id="save">Сохранить</button></div>`);
+    ${d?'<div id="tl"></div>':''}
+    <div class="right">${d?`<button class="btn light" id="dtask">+ Задача</button>`:''}<button class="btn light" onclick="closeModal()">Отмена</button><button class="btn" id="save">Сохранить</button></div>`);
+  if(d){ timelineHtml('deal_id='+d.id).then(h=>{ $('#tl').innerHTML=h; wireTimeline({deal_id:d.id,client_id:d.client_id}); });
+    $('#dtask').onclick=()=>taskForm({deal_id:d.id,client_id:d.client_id}); }
   $('#save').onclick=async()=>{
     const body={title:$('#dt').value,client_id:+$('#dc').value||null,manager_id:+$('#dm').value||null,amount:+$('#da').value,stage:$('#ds').value,note:$('#dn').value};
     if(!body.title) return toast('Введите название');
@@ -208,7 +214,8 @@ async function dealForm(d){
 // ---------- CLIENTS ----------
 async function vClients(){
   const m=$('#main');
-  m.innerHTML=`<div class="head"><h2>Клиенты</h2><button class="btn" id="add">+ Клиент</button></div><div id="c">Загрузка…</div>`;
+  m.innerHTML=`<div class="head"><h2>Клиенты</h2><div style="display:flex;gap:8px">
+    <a class="btn light" href="/api/export/clients.csv">⬇ CSV</a><button class="btn" id="add">+ Клиент</button></div></div><div id="c">Загрузка…</div>`;
   $('#add').onclick=()=>clientForm();
   const rows=await api('/clients');
   $('#c').innerHTML = rows.length? `<table><thead><tr><th>Клиент</th><th>Компания</th><th>Телефон</th><th>ИНН</th><th>Менеджер</th><th></th></tr></thead><tbody>${
@@ -228,24 +235,82 @@ function clientForm(c){
       <div class="f"><label>ИНН</label><input type="text" id="ci" value="${c?esc(c.inn||''):''}"></div>
       <div class="f"><label>Менеджер</label><select id="cm" ${scopeAll('clients')?'':'disabled'}>${mgrOptions(c?c.manager_id:ME.id)}</select></div>
       <div class="f full"><label>Заметки</label><textarea id="cnotes">${c?esc(c.notes||''):''}</textarea></div></div>
-    <div class="right"><button class="btn light" onclick="closeModal()">Отмена</button><button class="btn" id="save">Сохранить</button></div>`);
+    ${c?'<div id="tl"></div>':''}
+    <div class="right">${c?`<button class="btn light" id="ctask">+ Задача</button>`:''}<button class="btn light" onclick="closeModal()">Отмена</button><button class="btn" id="save">Сохранить</button></div>`);
+  if(c){ timelineHtml('client_id='+c.id).then(h=>{ $('#tl').innerHTML=h; wireTimeline({client_id:c.id}); });
+    $('#ctask').onclick=()=>taskForm({client_id:c.id}); }
   $('#save').onclick=async()=>{
     const body={name:$('#cn').value,company:$('#cc').value,phone:$('#cp').value,email:$('#ce').value,inn:$('#ci').value,manager_id:+$('#cm').value||null,notes:$('#cnotes').value};
     if(!body.name) return toast('Введите имя');
     try{ await api(c?'/clients/'+c.id:'/clients',{method:c?'PUT':'POST',body:JSON.stringify(body)}); closeModal(); toast('Сохранено'); vClients(); }catch(x){toast(x.message);} };
 }
 
+// ---------- TASKS ----------
+const dt = s => s ? new Date(s.replace(' ','T')).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+const overdue = s => s && new Date(s.replace(' ','T')) < new Date();
+async function vTasks(){
+  const m=$('#main');
+  const scopeAll2 = can('employees');
+  m.innerHTML=`<div class="head"><h2>Задачи и напоминания</h2><div style="display:flex;gap:8px">
+    ${scopeAll2?`<label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px"><input type="checkbox" id="tall"> все сотрудники</label>`:''}
+    <button class="btn" id="add">+ Задача</button></div></div><div id="t">Загрузка…</div>`;
+  $('#add').onclick=()=>taskForm();
+  const load=async()=>{
+    const all = scopeAll2 && $('#tall')?.checked ? '&scope=all' : '';
+    const rows=await api('/tasks?1=1'+all);
+    $('#t').innerHTML = rows.length? `<table><thead><tr><th></th><th>Задача</th><th>Срок</th><th>Клиент/Сделка</th>${scopeAll2?'<th>Сотрудник</th>':''}<th></th></tr></thead><tbody>${
+      rows.map(t=>`<tr style="${t.done?'opacity:.5':''}"><td><input type="checkbox" data-done="${t.id}" ${t.done?'checked':''}></td>
+        <td ${t.done?'style="text-decoration:line-through"':''}>${esc(t.title)}</td>
+        <td style="${!t.done&&overdue(t.due_at)?'color:var(--danger);font-weight:700':''}">${t.due_at?dt(t.due_at):'—'}</td>
+        <td style="font-size:12px;color:var(--muted)">${esc(t.client||t.deal||'')}</td>
+        ${scopeAll2?`<td>${esc(t.employee||'')}</td>`:''}
+        <td><button class="btn sm danger" data-del="${t.id}">✕</button></td></tr>`).join('')}</tbody></table>`
+      :'<div class="empty">Нет задач.</div>';
+    document.querySelectorAll('[data-done]').forEach(c=>c.onchange=async()=>{ await api('/tasks/'+c.dataset.done,{method:'PUT',body:JSON.stringify({done:c.checked})}); refreshBadge(); load(); });
+    document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{ await api('/tasks/'+b.dataset.del,{method:'DELETE'}); refreshBadge(); load(); });
+  };
+  if($('#tall')) $('#tall').onchange=load;
+  load();
+}
+function taskForm(ctx){ // ctx: {client_id, deal_id} optional
+  openModal(`<h3>Новая задача</h3><div class="frow">
+    <div class="f full"><label>Что сделать</label><input type="text" id="tt" placeholder="Например: перезвонить клиенту"></div>
+    <div class="f"><label>Срок</label><input type="datetime-local" id="td"></div>
+    ${can('employees')?`<div class="f"><label>Исполнитель</label><select id="te">${mgrOptions(ME.id)}</select></div>`:''}</div>
+    <div class="right"><button class="btn light" onclick="closeModal()">Отмена</button><button class="btn" id="save">Создать</button></div>`);
+  $('#save').onclick=async()=>{
+    const body={title:$('#tt').value,due_at:$('#td').value?$('#td').value.replace('T',' ')+':00':null,client_id:ctx?.client_id,deal_id:ctx?.deal_id};
+    if($('#te'))body.employee_id=+$('#te').value||null;
+    if(!body.title) return toast('Введите задачу');
+    try{ await api('/tasks',{method:'POST',body:JSON.stringify(body)}); closeModal(); toast('Задача создана'); refreshBadge(); if(VIEW==='tasks')vTasks(); }catch(x){toast(x.message);} };
+}
+// Лента активности + быстрая заметка (для карточек клиента/сделки)
+async function timelineHtml(q){
+  const acts = await api('/activities?'+q).catch(()=>[]);
+  const TYPE={note:'📝',call:'📞',stage:'🔻',order:'🧾',lead:'🌐',task:'✅'};
+  return `<div style="margin-top:14px"><label style="font-size:13px;color:var(--muted)">История</label>
+    <div style="display:flex;gap:8px;margin:6px 0"><input type="text" id="actxt" class="grow" placeholder="Добавить заметку / звонок…"><button class="btn sm" id="actadd">+</button></div>
+    <div id="acts" style="max-height:180px;overflow:auto">${acts.map(a=>`<div class="deal"><b>${TYPE[a.type]||'•'} ${esc(a.text||'')}</b><div class="m">${esc(a.employee||'')} · ${dt(a.created_at)}</div></div>`).join('')||'<div style="color:var(--muted);font-size:13px">Пока пусто</div>'}</div></div>`;
+}
+function wireTimeline(ctx){
+  const add=$('#actadd'); if(!add) return;
+  add.onclick=async()=>{ const t=$('#actxt').value.trim(); if(!t)return; await api('/activities',{method:'POST',body:JSON.stringify({...ctx,text:t,type:'note'})}); $('#actxt').value=''; toast('Записано'); };
+}
+
 // ---------- ORDERS ----------
 const OSTAT=[['new','Новый'],['processing','В работе'],['shipped','Отгружен'],['done','Завершён'],['canceled','Отменён']];
 async function vOrders(){
   const m=$('#main');
-  m.innerHTML=`<div class="head"><h2>Заказы</h2><button class="btn" id="add">+ Оформить заказ</button></div><div id="o">Загрузка…</div>`;
+  m.innerHTML=`<div class="head"><h2>Заказы</h2><div style="display:flex;gap:8px">
+    <a class="btn light" href="/api/export/orders.csv">⬇ CSV</a><button class="btn" id="add">+ Оформить заказ</button></div></div><div id="o">Загрузка…</div>`;
   $('#add').onclick=()=>orderForm();
   const rows=await api('/orders');
   $('#o').innerHTML = rows.length? `<table><thead><tr><th>№</th><th>Клиент</th><th>Менеджер</th><th>Позиций</th><th>Сумма</th><th>Статус</th><th></th></tr></thead><tbody>${
     rows.map(o=>`<tr><td><b>${o.number}</b></td><td>${esc(o.client||'—')}</td><td>${esc(o.manager||'—')}</td><td>${o.items.length}</td><td>${money(o.total)}</td>
       <td><select data-s="${o.id}">${OSTAT.map(([s,l])=>`<option value="${s}" ${o.status===s?'selected':''}>${l}</option>`).join('')}</select></td>
-      <td style="white-space:nowrap"><button class="btn sm light" data-e="${o.id}">✎</button> <button class="btn sm danger" data-d="${o.id}">✕</button></td></tr>`).join('')}</tbody></table>`
+      <td style="white-space:nowrap"><a class="btn sm light" href="/api/export/order/${o.id}/doc?type=kp" target="_blank" title="Коммерческое предложение">КП</a>
+        <a class="btn sm light" href="/api/export/order/${o.id}/doc?type=invoice" target="_blank" title="Счёт">Счёт</a>
+        <button class="btn sm light" data-e="${o.id}">✎</button> <button class="btn sm danger" data-d="${o.id}">✕</button></td></tr>`).join('')}</tbody></table>`
     :'<div class="empty">Пока нет заказов.</div>';
   document.querySelectorAll('[data-s]').forEach(s=>s.onchange=async()=>{ await api('/orders/'+s.dataset.s,{method:'PUT',body:JSON.stringify({status:s.value})}); toast('Статус обновлён'); });
   document.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>orderForm(rows.find(o=>o.id==b.dataset.e)));
@@ -324,20 +389,25 @@ function prodForm(p){
     <div class="right"><button class="btn light" onclick="closeModal()">Отмена</button><button class="btn" id="save">Сохранить</button></div>`);
   $('#save').onclick=async()=>{ try{ await api('/products/'+p.id,{method:'PUT',body:JSON.stringify({name:$('#pn').value,art:$('#pa').value,unit:$('#pu').value,price:+$('#pp').value})}); closeModal(); toast('Сохранено'); vCatalog(); }catch(x){toast(x.message);} };
 }
-function imgForm(id){
-  openModal(`<h3>Фото товара</h3>
-    <div id="prev" style="margin-bottom:12px"></div>
-    <input type="file" id="pf" accept="image/*">
-    <div class="right"><button class="btn light" onclick="closeModal()">Закрыть</button>
-      <button class="btn danger" id="rm">Удалить фото</button><button class="btn" id="up">Загрузить</button></div>`);
-  $('#up').onclick=async()=>{
-    const f=$('#pf').files[0]; if(!f) return toast('Выберите файл');
-    const fd=new FormData(); fd.append('image',f);
-    const r=await fetch('/api/products/'+id+'/image',{method:'POST',body:fd,credentials:'same-origin'});
-    const d=await r.json(); if(!r.ok) return toast(d.error||'Ошибка');
-    $('#prev').innerHTML=`<img src="${d.url}" style="max-width:100%;border-radius:10px">`; toast('Фото загружено'); vCatalog();
-  };
-  $('#rm').onclick=async()=>{ await api('/products/'+id+'/image',{method:'DELETE'}); toast('Фото удалено'); $('#prev').innerHTML=''; vCatalog(); };
+async function imgForm(id){
+  openModal(`<h3>Фото товара</h3><div id="gal">Загрузка…</div>
+    <div class="frow" style="margin-top:12px">
+      <div class="f"><label>Главное фото</label><input type="file" id="mf" accept="image/*"><button class="btn sm" id="mup" style="margin-top:6px">Загрузить главное</button></div>
+      <div class="f"><label>Доп. фото (галерея)</label><input type="file" id="gf" accept="image/*"><button class="btn sm" id="gup" style="margin-top:6px">Добавить в галерею</button></div></div>
+    <div class="right"><button class="btn light" onclick="closeModal()">Закрыть</button></div>`);
+  async function draw(){
+    const d=await api('/products/'+id+'/gallery');
+    $('#gal').innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap">
+      ${d.main?`<div style="text-align:center"><img src="${d.main}" style="width:90px;height:90px;object-fit:cover;border-radius:10px;border:2px solid var(--accent)"><div style="font-size:11px">главное <button class="btn sm danger" id="delmain">✕</button></div></div>`:'<div style="color:var(--muted);font-size:13px">Главного фото нет</div>'}
+      ${d.gallery.map(g=>`<div style="text-align:center"><img src="${g.url}" style="width:90px;height:90px;object-fit:cover;border-radius:10px;border:1px solid var(--line)"><div><button class="btn sm danger" data-gd="${g.id}">✕</button></div></div>`).join('')}</div>`;
+    if($('#delmain'))$('#delmain').onclick=async()=>{ await api('/products/'+id+'/image',{method:'DELETE'}); draw(); vCatalog(); };
+    document.querySelectorAll('[data-gd]').forEach(b=>b.onclick=async()=>{ await api('/products/gallery/'+b.dataset.gd,{method:'DELETE'}); draw(); });
+  }
+  const up=async(inp,url)=>{ const f=$(inp).files[0]; if(!f)return toast('Выберите файл'); const fd=new FormData(); fd.append('image',f);
+    const r=await fetch(url,{method:'POST',body:fd,credentials:'same-origin'}); const d=await r.json(); if(!r.ok)return toast(d.error||'Ошибка'); toast('Загружено'); draw(); vCatalog(); };
+  $('#mup').onclick=()=>up('#mf','/api/products/'+id+'/image');
+  $('#gup').onclick=()=>up('#gf','/api/products/'+id+'/gallery');
+  draw();
 }
 
 // ---------- STAFF ----------
@@ -383,6 +453,7 @@ async function boot(){
   try{ if(can('employees')){ const emp=await api('/employees'); EMPLOYEES=emp.map(e=>({id:e.id,name:e.name})); } else { EMPLOYEES=[{id:ME.id,name:ME.name}]; } }catch{ EMPLOYEES=[{id:ME.id,name:ME.name}]; }
   VIEW = can('reports')?'dash':'funnel';
   shell();
+  refreshBadge();
 }
 (async()=>{ try{ ME=await api('/auth/me'); boot(); }catch{ renderLogin(); } })();
 </script>

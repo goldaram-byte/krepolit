@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { db, STAGES } from '../db.js';
+import { db, STAGES, STAGE_LABELS, logActivity } from '../db.js';
 import { auth, scope, canTouch } from '../auth.js';
 const r = Router();
 r.use(auth);
@@ -31,6 +31,9 @@ r.put('/:id', (req, res) => {
   const st = stage && STAGES.includes(stage) ? stage : d.stage;
   db.prepare(`UPDATE deals SET title=?,client_id=?,manager_id=?,stage=?,amount=?,note=?,updated_at=datetime('now') WHERE id=?`)
     .run(title??d.title, client_id??d.client_id, mgr, st, amount==null?d.amount:+amount, note??d.note, req.params.id);
+  if (st !== d.stage)
+    logActivity({ type: 'stage', text: `Этап: ${STAGE_LABELS[d.stage]} → ${STAGE_LABELS[st]}`,
+      employee_id: req.user.id, client_id: d.client_id, deal_id: +req.params.id });
   res.json({ ok: true });
 });
 
