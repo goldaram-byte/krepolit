@@ -9,7 +9,9 @@ const GICON  = Object.fromEntries(GROUPS.map(g=>[g.id,g.icon]));
 const SNAME  = Object.fromEntries(SUBS.map(s=>[s.id,s.name]));
 const SBYID  = Object.fromEntries(SUBS.map(s=>[s.id,s]));
 const SUBSBYG = {}; SUBS.forEach(s=>{ (SUBSBYG[s.g]=SUBSBYG[s.g]||[]).push(s); });
-const P = K.products.map(a=>({id:a[0],g:a[1],s:a[2],cat:a[1],name:a[3],art:a[4],unit:a[5],price:a[6],w:a[7],desc:(a[2]&&window.KATALOG?'':''),tag:'',old:null}));
+const P = K.products.map(a=>({id:a[0],g:a[1],s:a[2],cat:a[1],name:a[3],art:a[4],unit:a[5],price:a[6],w:a[7],img:a[8]||'',desc:'',tag:'',old:null}));
+// маленький хелпер: фото товара с запасным SVG-значком, если файла нет
+function pimgHtml(p, iconSize){ return p.img ? `<img class="pimg-photo" src="images/${p.img}" alt="${(p.name||'').replace(/"/g,'')}" loading="lazy" onerror="this.remove()">` : ''; }
 const GCOUNT={}, SCOUNT={};
 P.forEach(p=>{ GCOUNT[p.g]=(GCOUNT[p.g]||0)+1; if(p.s) SCOUNT[p.s]=(SCOUNT[p.s]||0)+1; });
 P.forEach(p=>{ p.desc = SNAME[p.s] || GNAME[p.g] || ''; });
@@ -32,7 +34,7 @@ function tagHtml(p){
 function productCard(p){
   const inCart = CART[p.id];
   return `<div class="pcard">
-    <a class="pimg" href="product.html?id=${p.id}">${tagHtml(p)}<svg viewBox="0 0 48 48"><use href="#${CICON[p.cat]}"/></svg></a>
+    <a class="pimg" href="product.html?id=${p.id}">${tagHtml(p)}<svg viewBox="0 0 48 48"><use href="#${CICON[p.cat]}"/></svg>${pimgHtml(p)}</a>
     <div class="pbody">
       <div class="art">Арт. ${p.art}</div>
       <h4><a href="product.html?id=${p.id}">${p.name}</a></h4>
@@ -154,7 +156,7 @@ function renderDrawer(){
   const items=Object.entries(CART), box=el('ditems'), foot=el('dfoot');
   if(!box) return;
   if(!items.length){ box.innerHTML=`<div class="cart-empty">${ICO.cart.replace('width="22" height="22"','viewBox="0 0 24 24"')}<p>Корзина пуста.<br>Добавьте товары из каталога.</p><a class="btn btn-dark" href="catalog.html">В каталог</a></div>`; foot.innerHTML=''; return; }
-  box.innerHTML=items.map(([id,q])=>{const p=PBYID[id];if(!p)return'';return `<div class="ditem"><div class="di-img"><svg viewBox="0 0 48 48"><use href="#${CICON[p.cat]}"/></svg></div><div class="di-main"><b>${p.name}</b><div class="di-art">Арт. ${p.art} · ${fmt(p.price)} ₽/${p.unit}</div><div class="qty"><button data-q="${id}:-1">−</button><span>${q}</span><button data-q="${id}:1">+</button></div></div><div><div class="di-price">${fmt(p.price*q)} ₽</div><button class="di-del" data-del="${id}">Удалить</button></div></div>`;}).join('');
+  box.innerHTML=items.map(([id,q])=>{const p=PBYID[id];if(!p)return'';return `<div class="ditem"><div class="di-img"><svg viewBox="0 0 48 48"><use href="#${CICON[p.cat]}"/></svg>${pimgHtml(p)}</div><div class="di-main"><b>${p.name}</b><div class="di-art">Арт. ${p.art} · ${fmt(p.price)} ₽/${p.unit}</div><div class="qty"><button data-q="${id}:-1">−</button><span>${q}</span><button data-q="${id}:1">+</button></div></div><div><div class="di-price">${fmt(p.price*q)} ₽</div><button class="di-del" data-del="${id}">Удалить</button></div></div>`;}).join('');
   const total=cartTotal(), delivery=total>=30000?0:490;
   foot.innerHTML=`<div class="drow"><span>Товары (${cartCount()} шт.)</span><span>${fmt(total)} ₽</span></div><div class="drow"><span>Доставка по Москве</span><span>${delivery?fmt(delivery)+' ₽':'бесплатно'}</span></div><div class="dtotal"><span>Итого</span><span>${fmt(total+delivery)} ₽</span></div><a class="btn btn-accent" href="cart.html">Оформить заказ</a><button class="btn btn-light" data-cart-close>Продолжить покупки</button>`;
 }

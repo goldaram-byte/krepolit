@@ -34,7 +34,7 @@ function render(){
   }
   const rows = items.map(([id,q])=>{const p=PBYID[id];if(!p)return'';return `
     <div class="cart-row">
-      <a class="cr-img" href="product.html?id=${id}"><svg viewBox="0 0 48 48"><use href="#${CICON[p.cat]}"/></svg></a>
+      <a class="cr-img" href="product.html?id=${id}"><svg viewBox="0 0 48 48"><use href="#${CICON[p.cat]}"/></svg>${pimgHtml(p)}</a>
       <div class="cr-name"><b><a href="product.html?id=${id}">${p.name}</a></b><span>Арт. ${p.art}</span></div>
       <div class="cr-price">${fmt(p.price)} ₽/${p.unit}</div>
       <div class="qty"><button data-q="${id}:-1">−</button><span>${q}</span><button data-q="${id}:1">+</button></div>

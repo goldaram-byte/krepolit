@@ -56,7 +56,7 @@ if(!p){
   root.innerHTML = `
   <div class="pdp">
     <div class="pdp-gallery">
-      <div class="pdp-main-img">${tagHtml(p)}<svg viewBox="0 0 48 48"><use href="#${CICON[p.cat]}"/></svg></div>
+      <div class="pdp-main-img">${tagHtml(p)}<svg viewBox="0 0 48 48"><use href="#${CICON[p.cat]}"/></svg>${pimgHtml(p)}</div>
       <div class="pdp-thumbs"><div class="on"><svg viewBox="0 0 48 48"><use href="#${CICON[p.cat]}"/></svg></div><div><svg viewBox="0 0 48 48"><use href="#i-bolt"/></svg></div><div><svg viewBox="0 0 48 48"><use href="#i-washer"/></svg></div></div>
     </div>
     <div class="pdp-info">
