@@ -91,7 +91,7 @@ function headerHtml(active){
   const na = k => active===k?' class="active"':'';
   return `
 <div class="topbar"><div class="wrap">
-  <span class="tb-city"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="2"/></svg>Москва</span>
+  <span class="tb-city"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="2"/></svg>Королёв</span>
   <div class="tb-links"><a href="delivery.html">Доставка и оплата</a><a href="about.html">О компании</a><a href="#" data-modal="cert">Сертификаты</a><a href="news.html">Новости</a><a href="contacts.html">Контакты</a></div>
   <span class="sp"></span><a href="mailto:opt@krepolit.ru">opt@krepolit.ru</a><span>Пн–Пт 8:00–19:00, Сб 9:00–16:00</span>
 </div></div>
@@ -99,7 +99,7 @@ function headerHtml(active){
   <button class="icon-btn burger" data-menu-open aria-label="Меню"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
   <a href="index.html" class="logo" aria-label="КРЕПОЛИТ">${LOGO_SVG}<span class="lt"><b>КРЕПО<i>ЛИТ</i></b><span>крепёж и метизы</span></span></a>
   <form class="search" data-search autocomplete="off"><input type="search" name="q" placeholder="Поиск по каталогу: болт, саморез, анкер, артикул…" autocomplete="off"><button type="submit" aria-label="Найти"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#fff" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></button><div class="search-sug" id="search-sug" role="listbox"></div></form>
-  <div class="hd-contact"><div class="ph">8 800 555-24-70</div><span class="cb" data-modal="call">Заказать звонок</span></div>
+  <div class="hd-contact"><div class="ph">+7 909 933 24 64</div><span class="cb" data-modal="call">Заказать звонок</span></div>
   <div class="hd-actions"><a class="icon-btn" href="cart.html" aria-label="Корзина">${ICO.cart}<span class="cnt" data-cart-count style="display:none">0</span></a></div>
 </div></header>
 <nav class="nav"><div class="wrap">
@@ -110,7 +110,7 @@ function headerHtml(active){
     <a href="about.html"${na('about')}>О компании</a>
     <a href="contacts.html"${na('contacts')}>Контакты</a>
   </div>
-  <div class="nav-ph"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 5c0 9 6 15 15 15l0-3.5-4-1.5-2 2c-2-1-4-3-5-5l2-2-1.5-4L4 5z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>8 800 555-24-70</div>
+  <div class="nav-ph"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 5c0 9 6 15 15 15l0-3.5-4-1.5-2 2c-2-1-4-3-5-5l2-2-1.5-4L4 5z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>+7 909 933 24 64</div>
 </div><div class="mega" id="mega"><div class="wrap"><a class="mega-all" href="catalog.html"><b>Весь каталог</b><span>${GROUPS.length} групп · ${P.length.toLocaleString('ru-RU')} позиций</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><div class="mega-grid">${GROUPS.map(c=>`<a href="catalog.html?group=${c.id}"><svg viewBox="0 0 48 48"><use href="#${c.icon}"/></svg>${c.name}</a>`).join('')}</div></div></div></nav>`;
 }
 
@@ -119,7 +119,7 @@ const FOOTER_HTML = `
   <div class="cols">
     <div>
       <a href="index.html" class="logo" style="margin-bottom:16px">${LOGO_SVG}<span class="lt"><b style="color:#fff">КРЕПО<i style="color:#ff6a00">ЛИТ</i></b><span style="color:#7d8899">крепёж и метизы</span></span></a>
-      <p style="color:#8b96a6;max-width:280px;margin:0 0 8px">Оптовая и розничная поставка крепежа и метизов со склада в Москве по всей России.</p>
+      <p style="color:#8b96a6;max-width:280px;margin:0 0 8px">Оптовая и розничная поставка крепежа и метизов со склада в Королёве по всей России.</p>
       <div class="pay"><span>Наличные</span><span>Карта</span><span>Безнал с НДС</span><span>Отсрочка</span></div>
     </div>
     <div><h5>Каталог</h5>
@@ -129,7 +129,7 @@ const FOOTER_HTML = `
       <a href="about.html">О компании</a><a href="delivery.html">Доставка и оплата</a><a href="#" data-modal="cert">Сертификаты</a><a href="news.html">Новости</a><a href="contacts.html">Контакты</a>
     </div>
     <div class="fcontact"><h5>Контакты</h5>
-      <b>8 800 555-24-70</b><a href="mailto:opt@krepolit.ru">opt@krepolit.ru</a><a href="contacts.html">Москва, ул. Складочная, 12, стр. 4</a><a href="contacts.html">Пн–Пт 8:00–19:00, Сб 9:00–16:00</a>
+      <b>+7 909 933 24 64</b><a href="mailto:opt@krepolit.ru">opt@krepolit.ru</a><a href="contacts.html">г. Королёв, ул. Пионерская, 1а, стр. 2</a><a href="contacts.html">Пн–Пт 8:00–19:00, Сб 9:00–16:00</a>
       <button class="btn btn-accent" style="margin-top:12px" data-modal="call">Заказать звонок</button>
     </div>
   </div>
@@ -226,7 +226,7 @@ function initChrome(active){
     const raw = si.value.trim(), v = raw.toLowerCase();
     if(v.length<2){ sug.classList.remove('open'); sug.innerHTML=''; return; }
     const list = P.filter(p=>p.name.toLowerCase().includes(v)||p.art.toLowerCase().includes(v)||CNAME[p.cat].toLowerCase().includes(v)).slice(0,6);
-    if(!list.length){ sug.innerHTML=`<div class="sug-empty">Ничего не найдено по «${esc(raw)}».<br>Позвоните 8 800 555-24-70 — подберём вручную.</div>`; sug.classList.add('open'); return; }
+    if(!list.length){ sug.innerHTML=`<div class="sug-empty">Ничего не найдено по «${esc(raw)}».<br>Позвоните +7 909 933 24 64 — подберём вручную.</div>`; sug.classList.add('open'); return; }
     sug.innerHTML = list.map(p=>`<a class="sug-item" href="product.html?id=${p.id}"><span class="sug-ic"><svg viewBox="0 0 48 48"><use href="#${CICON[p.cat]}"/></svg></span><span class="sug-tx"><b>${p.name}</b><em>Арт. ${p.art} · ${CNAME[p.cat]}</em></span><span class="sug-pr">${fmt(p.price)} ₽</span></a>`).join('')
       + `<a class="sug-all" href="catalog.html?q=${encodeURIComponent(raw)}">Показать все результаты по «${esc(raw)}» →</a>`;
     sug.classList.add('open');

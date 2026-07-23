@@ -52,13 +52,13 @@ r.get('/order/:id/doc', (req, res) => {
   .meta{font-size:13px;color:#333;line-height:1.6}.print{margin:14px 0}@media print{.print{display:none}}
   button{background:#ff6a00;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-weight:700;cursor:pointer}</style></head>
   <body><div class="print"><button onclick="print()">🖨 Печать / Сохранить в PDF</button></div>
-  <div class="top"><div><div class="brand">КРЕПО<span>ЛИТ</span></div><div class="meta">Крепёж и метизы · Москва · 8 800 555-24-70</div></div>
+  <div class="top"><div><div class="brand">КРЕПО<span>ЛИТ</span></div><div class="meta">Крепёж и метизы · Королёв · +7 909 933 24 64</div></div>
     <div class="meta" style="text-align:right"><b>${isKP?'Коммерческое предложение':'Счёт'} № ${o.number}</b><br>от ${new Date(o.created_at.replace(' ','T')).toLocaleDateString('ru-RU')}</div></div>
   <div class="meta"><b>Клиент:</b> ${o.client||'—'}${o.company?', '+o.company:''}${o.inn?' · ИНН '+o.inn:''}${o.phone?' · '+o.phone:''}<br>
     <b>Менеджер:</b> ${o.manager||'—'}</div>
   <table><thead><tr><th>№</th><th>Наименование</th><th>Ед.</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>${rows||'<tr><td colspan=6>Нет позиций</td></tr>'}</tbody></table>
   <div class="tot">Итого: ${money(o.total)} ₽</div>
-  <div class="meta" style="margin-top:20px">${isKP?'Предложение действительно 14 дней. Цены указаны с учётом НДС.':'Оплата в течение 3 банковских дней. Товар отгружается со склада в Москве.'}</div>
+  <div class="meta" style="margin-top:20px">${isKP?'Предложение действительно 14 дней. Цены указаны с учётом НДС.':'Оплата в течение 3 банковских дней. Товар отгружается со склада в Королёве.'}</div>
   </body></html>`);
 });
 
