@@ -1,0 +1,9 @@
+.git
+**/node_modules
+server/krepolit.db
+server/krepolit.db-wal
+server/krepolit.db-shm
+uploads/*
+!uploads/.gitignore
+data
+*.md

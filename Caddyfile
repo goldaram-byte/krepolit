@@ -1,0 +1,12 @@
+# krepolit.ru — публичная витрина
+krepolit.ru, www.krepolit.ru {
+	encode gzip
+	reverse_proxy app:3000
+}
+
+# krepolit.online — админ-панель (корень редиректит на /admin)
+krepolit.online, www.krepolit.online {
+	encode gzip
+	redir / /admin 302
+	reverse_proxy app:3000
+}
