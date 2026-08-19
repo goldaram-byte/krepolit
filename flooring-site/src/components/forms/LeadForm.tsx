@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { formatRuPhone } from "@/lib/phone-mask";
 import { readUtmFromLocation } from "@/lib/utm";
@@ -14,6 +14,9 @@ type LeadFormProps = {
   title?: string;
   submitLabel?: string;
   showMessage?: boolean;
+  /** Prefills (and keeps in sync with) the message field — e.g. a
+   * calculator result summary that updates as inputs change. */
+  defaultMessage?: string;
   className?: string;
 };
 
@@ -24,6 +27,7 @@ export function LeadForm({
   title,
   submitLabel = "Отправить заявку",
   showMessage = false,
+  defaultMessage,
   className,
 }: LeadFormProps) {
   const router = useRouter();
@@ -35,8 +39,12 @@ export function LeadForm({
   );
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(defaultMessage ?? "");
   const [consent, setConsent] = useState(false);
+
+  useEffect(() => {
+    if (defaultMessage != null) setMessage(defaultMessage);
+  }, [defaultMessage]);
   const [state, setState] = useState<SubmitState>("idle");
   const [error, setError] = useState<string | null>(null);
 

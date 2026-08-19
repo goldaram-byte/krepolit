@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 const nav = [
+  { href: "/catalog", label: "Каталог" },
+  { href: "/calculator", label: "Калькулятор" },
   { href: "/about", label: "О компании" },
   { href: "/delivery", label: "Доставка и оплата" },
   { href: "/contacts", label: "Контакты" },

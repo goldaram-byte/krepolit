@@ -9,15 +9,20 @@
     "lint": "eslint",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy"
+    "db:deploy": "prisma migrate deploy",
+    "import": "tsx scripts/import/index.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
+    "csv-parse": "^7.0.2",
+    "exceljs": "^4.4.0",
+    "fast-xml-parser": "^5.11.0",
     "next": "15.5.23",
     "pg": "^8.23.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "sharp": "^0.35.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -32,11 +37,13 @@
     "eslint-config-next": "15.5.23",
     "prisma": "^7.9.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.12",
     "typescript": "^5"
   },
   "overrides": {
     "sharp": "^0.35.3",
     "deepmerge-ts": "^8.0.1",
+    "uuid": "^14.0.2",
     "next": {
       "postcss": "^8.5.26"
     }

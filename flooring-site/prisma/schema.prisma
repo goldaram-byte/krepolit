@@ -85,70 +85,73 @@ model Category {
 }
 
 model Collection {
-  id          String        @id @default(cuid())
-  slug        String        @unique
+  id          String       @id @default(cuid())
+  slug        String       @unique
   name        String
   brandId     String
-  brand       Brand         @relation(fields: [brandId], references: [id])
+  brand       Brand        @relation(fields: [brandId], references: [id])
   description String?
-  thickness   Decimal?      @db.Decimal(6, 2)
-  wearLayer   Decimal?      @db.Decimal(6, 2)
+  thickness   Decimal?     @db.Decimal(6, 2)
+  wearLayer   Decimal?     @db.Decimal(6, 2)
   wearClass   String?
   format      String?
   installType InstallType?
-  images      String[]      @default([])
+  images      String[]     @default([])
   products    Product[]
 
   @@map("collections")
 }
 
 model Product {
-  id             String      @id @default(cuid())
-  sku            String      @unique
-  slug           String      @unique
-  name           String
+  id   String @id @default(cuid())
+  sku  String @unique
+  slug String @unique
+  name String
 
-  collectionId   String?
-  collection     Collection? @relation(fields: [collectionId], references: [id])
-  brandId        String
-  brand          Brand       @relation(fields: [brandId], references: [id])
-  categoryId     String
-  category       Category    @relation(fields: [categoryId], references: [id])
+  collectionId String?
+  collection   Collection? @relation(fields: [collectionId], references: [id])
+  brandId      String
+  brand        Brand       @relation(fields: [brandId], references: [id])
+  categoryId   String
+  category     Category    @relation(fields: [categoryId], references: [id])
 
-  decorName      String
-  decorType      DecorType
+  decorName String
+  decorType DecorType
 
-  lengthMm       Int
-  widthMm        Int
-  thicknessMm    Decimal     @db.Decimal(6, 2)
-  wearLayerMm    Decimal?    @db.Decimal(6, 2)
-  wearClass      String?
+  lengthMm    Int
+  widthMm     Int
+  thicknessMm Decimal  @db.Decimal(6, 2)
+  wearLayerMm Decimal? @db.Decimal(6, 2)
+  wearClass   String?
 
-  m2PerPack      Decimal     @db.Decimal(8, 4)
+  m2PerPack      Decimal  @db.Decimal(8, 4)
   packsPerPallet Int?
-  weightKg       Decimal?    @db.Decimal(8, 3)
+  weightKg       Decimal? @db.Decimal(8, 3)
 
-  purchasePrice  Decimal     @db.Decimal(10, 2)
-  rrcPrice       Decimal?    @db.Decimal(10, 2)
-  ourPrice       Decimal     @db.Decimal(10, 2)
-  oldPrice       Decimal?    @db.Decimal(10, 2)
+  waterproof          Boolean @default(false)
+  warmFloorCompatible Boolean @default(false)
+
+  purchasePrice Decimal  @db.Decimal(10, 2)
+  rrcPrice      Decimal? @db.Decimal(10, 2)
+  ourPrice      Decimal  @db.Decimal(10, 2)
+  oldPrice      Decimal? @db.Decimal(10, 2)
   // Set when ourPrice was clamped up to rrcPrice — needs manual review of the supplier markup.
-  belowRrcFlag   Boolean     @default(false)
+  belowRrcFlag  Boolean  @default(false)
 
-  stockQty       Int         @default(0)
-  stockStatus    StockStatus @default(out_of_stock)
+  stockQty    Int         @default(0)
+  stockStatus StockStatus @default(out_of_stock)
 
-  supplierId     String
-  supplier       Supplier    @relation(fields: [supplierId], references: [id])
+  supplierId String
+  supplier   Supplier @relation(fields: [supplierId], references: [id])
 
-  images         String[]    @default([])
-  isPublished    Boolean     @default(false)
+  images      String[] @default([])
+  isPublished Boolean  @default(false)
 
   seoTitle       String?
   seoDescription String?
 
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([categoryId])
   @@index([brandId])

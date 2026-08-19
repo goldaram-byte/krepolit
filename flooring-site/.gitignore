@@ -43,3 +43,7 @@ next-env.d.ts
 
 # prisma generated client
 /src/generated/prisma
+
+# downloaded/optimized product photos (see scripts/import/images.ts, README)
+/storage/
+/public/uploads
