@@ -1,0 +1,271 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum DecorType {
+  wood
+  stone
+  tile
+  herringbone
+}
+
+enum StockStatus {
+  in_stock
+  on_order
+  out_of_stock
+}
+
+enum InstallType {
+  click
+  glue
+}
+
+enum FeedType {
+  yml
+  xlsx
+  csv
+}
+
+enum LeadType {
+  samples
+  estimate
+  site_visit
+  consultation
+  callback
+  // Not in SPEC.md §3's literal list, but §5 explicitly requires /pro
+  // submissions to be "a separate channel, not mixed with retail" — a
+  // dedicated type is what makes that separation real instead of implicit.
+  partner
+}
+
+enum LeadStatus {
+  new
+  in_progress
+  done
+  rejected
+}
+
+enum SampleOrderStatus {
+  new
+  confirmed
+  shipped
+  delivered
+  cancelled
+}
+
+model Brand {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  name        String
+  country     String?
+  logo        String?
+  description String?
+  isActive    Boolean      @default(true)
+  collections Collection[]
+  products    Product[]
+
+  @@map("brands")
+}
+
+model Category {
+  id             String     @id @default(cuid())
+  slug           String     @unique
+  name           String
+  parentId       String?
+  parent         Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children       Category[] @relation("CategoryTree")
+  description    String?
+  seoTitle       String?
+  seoDescription String?
+  sortOrder      Int        @default(0)
+  products       Product[]
+
+  @@map("categories")
+}
+
+model Collection {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  name        String
+  brandId     String
+  brand       Brand        @relation(fields: [brandId], references: [id])
+  description String?
+  thickness   Decimal?     @db.Decimal(6, 2)
+  wearLayer   Decimal?     @db.Decimal(6, 2)
+  wearClass   String?
+  format      String?
+  installType InstallType?
+  images      String[]     @default([])
+  products    Product[]
+
+  @@map("collections")
+}
+
+model Product {
+  id   String @id @default(cuid())
+  sku  String @unique
+  slug String @unique
+  name String
+
+  collectionId String?
+  collection   Collection? @relation(fields: [collectionId], references: [id])
+  brandId      String
+  brand        Brand       @relation(fields: [brandId], references: [id])
+  categoryId   String
+  category     Category    @relation(fields: [categoryId], references: [id])
+
+  decorName String
+  decorType DecorType
+
+  lengthMm    Int
+  widthMm     Int
+  thicknessMm Decimal  @db.Decimal(6, 2)
+  wearLayerMm Decimal? @db.Decimal(6, 2)
+  wearClass   String?
+
+  m2PerPack      Decimal  @db.Decimal(8, 4)
+  packsPerPallet Int?
+  weightKg       Decimal? @db.Decimal(8, 3)
+
+  waterproof          Boolean @default(false)
+  warmFloorCompatible Boolean @default(false)
+
+  purchasePrice   Decimal  @db.Decimal(10, 2)
+  rrcPrice        Decimal? @db.Decimal(10, 2)
+  ourPrice        Decimal  @db.Decimal(10, 2)
+  oldPrice        Decimal? @db.Decimal(10, 2)
+  // Set when ourPrice was clamped up to rrcPrice — needs manual review of the supplier markup.
+  belowRrcFlag    Boolean  @default(false)
+  // Set by an admin manual price edit (SPEC.md §8) — the importer must not
+  // silently overwrite it with the computed price on the next run.
+  priceOverridden Boolean  @default(false)
+
+  stockQty    Int         @default(0)
+  stockStatus StockStatus @default(out_of_stock)
+
+  supplierId String
+  supplier   Supplier @relation(fields: [supplierId], references: [id])
+
+  images      String[] @default([])
+  isPublished Boolean  @default(false)
+
+  seoTitle       String?
+  seoDescription String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([stockStatus])
+  @@map("products")
+}
+
+model Supplier {
+  id            String      @id @default(cuid())
+  name          String
+  contactPerson String?
+  phone         String?
+  email         String?
+  feedUrl       String?
+  feedType      FeedType?
+  columnMapping Json?
+  markupPercent Decimal     @db.Decimal(6, 2)
+  deliveryTerms String?
+  minOrderRub   Decimal?    @db.Decimal(10, 2)
+  notes         String?
+  products      Product[]
+  importRuns    ImportRun[]
+
+  @@map("suppliers")
+}
+
+model ImportRun {
+  id         String   @id @default(cuid())
+  supplierId String
+  supplier   Supplier @relation(fields: [supplierId], references: [id])
+  createdAt  DateTime @default(now())
+  // ImportStats (scripts/import/types.ts), stored as-is for the admin dashboard.
+  stats      Json
+
+  @@index([supplierId])
+  @@map("import_runs")
+}
+
+model Lead {
+  id          String       @id @default(cuid())
+  type        LeadType
+  name        String
+  phone       String
+  email       String?
+  message     String?
+  items       Json?
+  utm         Json?
+  pageUrl     String?
+  status      LeadStatus   @default(new)
+  note        String?
+  createdAt   DateTime     @default(now())
+  sampleOrder SampleOrder?
+
+  @@index([type])
+  @@index([status])
+  @@map("leads")
+}
+
+model SampleOrder {
+  id            String            @id @default(cuid())
+  leadId        String            @unique
+  lead          Lead              @relation(fields: [leadId], references: [id])
+  productIds    String[]
+  address       String
+  deliveryPrice Decimal           @db.Decimal(10, 2)
+  status        SampleOrderStatus @default(new)
+
+  @@map("sample_orders")
+}
+
+model Article {
+  id             String    @id @default(cuid())
+  slug           String    @unique
+  title          String
+  excerpt        String?
+  body           String
+  coverImage     String?
+  publishedAt    DateTime?
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("articles")
+}
+
+model AdminUser {
+  id           String         @id @default(cuid())
+  login        String         @unique
+  passwordHash String
+  createdAt    DateTime       @default(now())
+  sessions     AdminSession[]
+
+  @@map("admin_users")
+}
+
+model AdminSession {
+  id        String    @id @default(cuid())
+  userId    String
+  user      AdminUser @relation(fields: [userId], references: [id])
+  // SHA-256 of the opaque bearer token stored in the session cookie — the
+  // cookie value itself is never persisted, only its hash (standard
+  // session-token pattern; the DB row id is not treated as a secret).
+  tokenHash String    @unique
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("admin_sessions")
+}

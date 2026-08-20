@@ -1,0 +1,21 @@
+[Unit]
+Description=flooring-site Next.js app
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+# TODO: adjust user, working directory and Node.js path to match the VPS.
+User=deploy
+WorkingDirectory=/var/www/flooring-site
+EnvironmentFile=/var/www/flooring-site/.env
+ExecStart=/var/www/flooring-site/node_modules/.bin/next start --port 3000
+Restart=on-failure
+RestartSec=5
+# The service has no need for elevated privileges or filesystem access
+# beyond its own app and storage directories.
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/www/flooring-site/storage
+
+[Install]
+WantedBy=multi-user.target
