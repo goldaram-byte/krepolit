@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { SamplesCounter } from "@/components/samples/SamplesCounter";
 
 const nav = [
   { href: "/catalog", label: "Каталог" },
   { href: "/calculator", label: "Калькулятор" },
+  { href: "/pro", label: "Дизайнерам и бригадам" },
   { href: "/about", label: "О компании" },
   { href: "/delivery", label: "Доставка и оплата" },
   { href: "/contacts", label: "Контакты" },
@@ -23,12 +25,15 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <a
-          href="tel:+70000000000"
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          Позвонить
-        </a>
+        <div className="flex items-center gap-3">
+          <SamplesCounter />
+          <a
+            href="tel:+70000000000"
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Позвонить
+          </a>
+        </div>
       </div>
     </header>
   );

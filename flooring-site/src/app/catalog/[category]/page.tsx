@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { FilterPanel } from "@/components/catalog/FilterPanel";
+import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
 import {
   buildOrderBy,
   buildProductWhere,
@@ -25,16 +26,29 @@ async function getCategory(slug: string) {
   });
 }
 
-export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: CategoryPageProps): Promise<Metadata> {
   const { category: slug } = await params;
+  const query = await searchParams;
   const category = await getCategory(slug);
   if (!category) return {};
 
   return {
     title: category.seoTitle || category.name,
     description: category.seoDescription || category.description || undefined,
-    alternates: { canonical: `/catalog/${category.slug}` },
+    alternates: { canonical: `/catalog/${category.slug}${canonicalQuery(query)}` },
   };
+}
+
+// Filters/sort collapse to the clean category URL (SPEC.md §5: "rel=canonical
+// на чистую категорию") since they're subsets/reorderings of the same set.
+// Pagination alone keeps its own canonical — each page has genuinely
+// different products, so page 2+ shouldn't point back at page 1.
+function canonicalQuery(query: CatalogSearchParams): string {
+  const { page, ...filters } = query;
+  const hasActiveFilters = Object.values(filters).some((v) => !!v);
+  if (hasActiveFilters) return "";
+  if (page && page !== "1") return `?page=${page}`;
+  return "";
 }
 
 export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
@@ -76,6 +90,13 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Каталог", path: "/catalog" },
+          ...breadcrumbs.map((c) => ({ name: c.name, path: `/catalog/${c.slug}` })),
+        ]}
+      />
+
       <nav aria-label="Хлебные крошки" className="mb-4 text-sm text-stone-500">
         <Link href="/catalog" className="hover:text-stone-900">
           Каталог

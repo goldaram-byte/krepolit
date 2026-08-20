@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { YandexMetrika } from "@/components/analytics/YandexMetrika";
+import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -10,6 +13,7 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Напольные покрытия оптом и в розницу — Москва и МО",
     template: "%s — напольные покрытия",
@@ -26,6 +30,8 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body className={`${geistSans.variable} flex min-h-screen flex-col antialiased`}>
+        <OrganizationJsonLd />
+        <YandexMetrika />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

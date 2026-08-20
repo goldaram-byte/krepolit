@@ -7,6 +7,7 @@ export const leadTypeValues = [
   "site_visit",
   "consultation",
   "callback",
+  "partner",
 ] as const;
 
 export type LeadTypeValue = (typeof leadTypeValues)[number];
@@ -25,15 +26,13 @@ export const utmSchema = z
   })
   .partial();
 
-export const leadFormSchema = z.object({
-  type: z.enum(leadTypeValues),
+const contactFieldsSchema = {
   name: z.string().trim().min(2, "Введите имя").max(100),
   phone: z
     .string()
     .trim()
     .regex(phoneRegex, "Введите корректный номер телефона"),
   email: z.union([z.literal(""), z.string().trim().email()]).optional(),
-  message: z.string().trim().max(2000).optional(),
   consent: z.literal(true, "Нужно согласие на обработку персональных данных"),
   // Honeypot: real users never fill this hidden field, bots often do.
   // Deliberately not rejected here — a validation error would tip bots off
@@ -42,6 +41,23 @@ export const leadFormSchema = z.object({
   website: z.string().max(500).optional().default(""),
   pageUrl: z.string().max(500).optional(),
   utm: utmSchema.optional(),
+};
+
+export const leadFormSchema = z.object({
+  type: z.enum(leadTypeValues),
+  message: z.string().trim().max(2000).optional(),
+  ...contactFieldsSchema,
 });
 
 export type LeadFormInput = z.infer<typeof leadFormSchema>;
+
+export const sampleOrderSchema = z.object({
+  ...contactFieldsSchema,
+  address: z.string().trim().min(5, "Укажите адрес доставки").max(300),
+  productSlugs: z
+    .array(z.string())
+    .min(1, "Добавьте хотя бы один образец")
+    .max(5, "Можно выбрать не более 5 образцов"),
+});
+
+export type SampleOrderInput = z.infer<typeof sampleOrderSchema>;

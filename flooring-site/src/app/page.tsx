@@ -1,18 +1,22 @@
 import Link from "next/link";
 import { LeadForm } from "@/components/forms/LeadForm";
+import { FaqJsonLd } from "@/components/seo/FaqJsonLd";
 
 const actionCards = [
   {
     title: "Заказать образцы",
     description: "Пришлём до 5 образцов декора с доставкой, стоимость зачитываем в заказ.",
+    href: "/catalog",
   },
   {
     title: "Бесплатный расчёт метража",
     description: "Посчитаем количество упаковок и итоговую сумму под вашу планировку.",
+    href: "/calculator",
   },
   {
     title: "Выезд специалиста",
     description: "Привезём образцы на объект и посмотрим на месте.",
+    href: "#request",
   },
 ];
 
@@ -66,7 +70,7 @@ export default function HomePage() {
           {actionCards.map((card) => (
             <a
               key={card.title}
-              href="#request"
+              href={card.href}
               className="block rounded-lg border border-stone-200 p-6 transition hover:border-blue-600 hover:shadow-sm"
             >
               <h3 className="font-semibold text-stone-900">{card.title}</h3>
@@ -109,6 +113,7 @@ export default function HomePage() {
             ))}
           </div>
         </div>
+        <FaqJsonLd items={objections.map((o) => ({ question: o.title, answer: o.text }))} />
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-14">
@@ -118,7 +123,7 @@ export default function HomePage() {
           обработка заявок, отдельный канал связи.
         </p>
         <Link
-          href="/contacts"
+          href="/pro"
           className="mt-4 inline-block font-medium text-blue-600 hover:text-blue-700"
         >
           Узнать условия →
@@ -132,7 +137,7 @@ export default function HomePage() {
             Выберите, что вам нужно — перезвоним в течение рабочего дня.
           </p>
           <LeadForm
-            type={["samples", "estimate", "site_visit", "consultation"]}
+            type={["estimate", "site_visit", "consultation", "callback"]}
             showMessage
             className="mt-6 rounded-lg bg-white p-6 shadow-sm"
           />

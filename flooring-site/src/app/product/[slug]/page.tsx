@@ -5,8 +5,10 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { formatArea, formatPrice, pricePerM2 } from "@/lib/format";
 import { AreaCalculator } from "@/components/calculator/AreaCalculator";
-import { LeadForm } from "@/components/forms/LeadForm";
 import { ProductCard } from "@/components/catalog/ProductCard";
+import { AddToSamplesButton } from "@/components/samples/AddToSamplesButton";
+import { BreadcrumbJsonLd } from "@/components/seo/BreadcrumbJsonLd";
+import { ProductJsonLd } from "@/components/seo/ProductJsonLd";
 
 export const revalidate = 3600;
 
@@ -96,6 +98,26 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Каталог", path: "/catalog" },
+          { name: product.category.name, path: `/catalog/${product.category.slug}` },
+          { name: product.name, path: `/product/${product.slug}` },
+        ]}
+      />
+      <ProductJsonLd
+        product={{
+          slug: product.slug,
+          name: product.name,
+          decorName: product.decorName,
+          images: product.images,
+          sku: product.sku,
+          brandName: product.brand.name,
+          price: product.ourPrice.toNumber(),
+          stockStatus: product.stockStatus,
+        }}
+      />
+
       <nav aria-label="Хлебные крошки" className="mb-4 text-sm text-stone-500">
         <Link href="/catalog" className="hover:text-stone-900">
           Каталог
@@ -153,12 +175,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </p>
 
           {isAvailable ? (
-            <a
-              href="#samples"
-              className="mt-6 inline-block rounded-md bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700"
-            >
-              Заказать образец
-            </a>
+            <div className="mt-6">
+              <AddToSamplesButton slug={product.slug} />
+            </div>
           ) : (
             <p className="mt-6 text-stone-600">
               Этот декор сейчас недоступен — посмотрите похожие варианты ниже или оставьте заявку,
@@ -204,18 +223,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
         </section>
       )}
-
-      <section id="samples" className="mt-14 border-t border-stone-200 pt-10">
-        <h2 className="text-xl font-semibold text-stone-900">Заказать образец</h2>
-        <div className="mt-6 max-w-md">
-          <LeadForm
-            type="samples"
-            submitLabel="Заказать образец"
-            defaultMessage={`Образец: ${product.name}`}
-            showMessage
-          />
-        </div>
-      </section>
     </div>
   );
 }

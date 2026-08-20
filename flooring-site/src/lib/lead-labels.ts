@@ -6,4 +6,5 @@ export const leadTypeLabels: Record<LeadTypeValue, string> = {
   site_visit: "Выезд специалиста",
   consultation: "Консультация",
   callback: "Обратный звонок",
+  partner: "Партнёрская заявка",
 };

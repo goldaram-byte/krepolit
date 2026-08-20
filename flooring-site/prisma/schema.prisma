@@ -37,6 +37,10 @@ enum LeadType {
   site_visit
   consultation
   callback
+  // Not in SPEC.md §3's literal list, but §5 explicitly requires /pro
+  // submissions to be "a separate channel, not mixed with retail" — a
+  // dedicated type is what makes that separation real instead of implicit.
+  partner
 }
 
 enum LeadStatus {

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { formatRuPhone } from "@/lib/phone-mask";
 import { readUtmFromLocation } from "@/lib/utm";
 import { leadTypeLabels } from "@/lib/lead-labels";
+import { leadTypeToGoal, reachGoal } from "@/lib/metrika";
 import type { LeadTypeValue } from "@/lib/validation";
 
 type LeadFormProps = {
@@ -87,6 +88,7 @@ export function LeadForm({
         return;
       }
 
+      reachGoal(leadTypeToGoal[selectedType]);
       router.push(`/thanks?type=${selectedType}`);
     } catch {
       setError("Не удалось отправить заявку, проверьте соединение");
