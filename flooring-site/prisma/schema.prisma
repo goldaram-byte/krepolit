@@ -135,12 +135,15 @@ model Product {
   waterproof          Boolean @default(false)
   warmFloorCompatible Boolean @default(false)
 
-  purchasePrice Decimal  @db.Decimal(10, 2)
-  rrcPrice      Decimal? @db.Decimal(10, 2)
-  ourPrice      Decimal  @db.Decimal(10, 2)
-  oldPrice      Decimal? @db.Decimal(10, 2)
+  purchasePrice   Decimal  @db.Decimal(10, 2)
+  rrcPrice        Decimal? @db.Decimal(10, 2)
+  ourPrice        Decimal  @db.Decimal(10, 2)
+  oldPrice        Decimal? @db.Decimal(10, 2)
   // Set when ourPrice was clamped up to rrcPrice — needs manual review of the supplier markup.
-  belowRrcFlag  Boolean  @default(false)
+  belowRrcFlag    Boolean  @default(false)
+  // Set by an admin manual price edit (SPEC.md §8) — the importer must not
+  // silently overwrite it with the computed price on the next run.
+  priceOverridden Boolean  @default(false)
 
   stockQty    Int         @default(0)
   stockStatus StockStatus @default(out_of_stock)
@@ -164,7 +167,7 @@ model Product {
 }
 
 model Supplier {
-  id            String    @id @default(cuid())
+  id            String      @id @default(cuid())
   name          String
   contactPerson String?
   phone         String?
@@ -172,13 +175,26 @@ model Supplier {
   feedUrl       String?
   feedType      FeedType?
   columnMapping Json?
-  markupPercent Decimal   @db.Decimal(6, 2)
+  markupPercent Decimal     @db.Decimal(6, 2)
   deliveryTerms String?
-  minOrderRub   Decimal?  @db.Decimal(10, 2)
+  minOrderRub   Decimal?    @db.Decimal(10, 2)
   notes         String?
   products      Product[]
+  importRuns    ImportRun[]
 
   @@map("suppliers")
+}
+
+model ImportRun {
+  id         String   @id @default(cuid())
+  supplierId String
+  supplier   Supplier @relation(fields: [supplierId], references: [id])
+  createdAt  DateTime @default(now())
+  // ImportStats (scripts/import/types.ts), stored as-is for the admin dashboard.
+  stats      Json
+
+  @@index([supplierId])
+  @@map("import_runs")
 }
 
 model Lead {
@@ -243,6 +259,10 @@ model AdminSession {
   id        String    @id @default(cuid())
   userId    String
   user      AdminUser @relation(fields: [userId], references: [id])
+  // SHA-256 of the opaque bearer token stored in the session cookie — the
+  // cookie value itself is never persisted, only its hash (standard
+  // session-token pattern; the DB row id is not treated as a secret).
+  tokenHash String    @unique
   expiresAt DateTime
   createdAt DateTime  @default(now())
 

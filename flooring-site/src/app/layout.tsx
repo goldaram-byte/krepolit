@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
+import { SiteChrome } from "@/components/layout/SiteChrome";
 import { YandexMetrika } from "@/components/analytics/YandexMetrika";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import { SITE_URL } from "@/lib/site";
@@ -32,9 +31,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} flex min-h-screen flex-col antialiased`}>
         <OrganizationJsonLd />
         <YandexMetrika />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );

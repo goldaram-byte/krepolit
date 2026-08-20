@@ -137,7 +137,7 @@ export async function upsertOffers(
 
     const existing = await prisma.product.findUnique({
       where: { sku: offer.sku },
-      select: { id: true, ourPrice: true, images: true },
+      select: { id: true, ourPrice: true, images: true, priceOverridden: true },
     });
 
     const images =
@@ -165,8 +165,8 @@ export async function upsertOffers(
       purchasePrice: new Prisma.Decimal(offer.purchasePrice),
       rrcPrice: offer.rrcPrice != null ? new Prisma.Decimal(offer.rrcPrice) : null,
       ourPrice,
-      oldPrice: offer.oldPrice != null ? new Prisma.Decimal(offer.oldPrice) : null,
       belowRrcFlag,
+      oldPrice: offer.oldPrice != null ? new Prisma.Decimal(offer.oldPrice) : null,
       stockQty: offer.stockQty ?? 0,
       stockStatus,
       supplierId: supplier.id,
@@ -181,7 +181,14 @@ export async function upsertOffers(
         stats.priceChangedOver10Percent += 1;
       }
 
-      await prisma.product.update({ where: { id: existing.id }, data });
+      // An admin-overridden price (SPEC.md §8) survives re-imports — the
+      // feed's purchasePrice/rrcPrice above still stay current, but the
+      // derived ourPrice/belowRrcFlag are left untouched.
+      const updateData = existing.priceOverridden
+        ? { ...data, ourPrice: undefined, belowRrcFlag: undefined }
+        : data;
+
+      await prisma.product.update({ where: { id: existing.id }, data: updateData });
       stats.updated += 1;
     } else {
       const slug = await uniqueProductSlug(prisma, offer.name, offer.sku);

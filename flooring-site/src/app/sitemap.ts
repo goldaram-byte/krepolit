@@ -12,16 +12,21 @@ const staticPages = [
   { path: "/catalog", priority: 0.9, changeFrequency: "daily" as const },
   { path: "/calculator", priority: 0.6, changeFrequency: "monthly" as const },
   { path: "/pro", priority: 0.5, changeFrequency: "monthly" as const },
+  { path: "/blog", priority: 0.6, changeFrequency: "weekly" as const },
   { path: "/about", priority: 0.4, changeFrequency: "yearly" as const },
   { path: "/delivery", priority: 0.4, changeFrequency: "yearly" as const },
   { path: "/contacts", priority: 0.4, changeFrequency: "yearly" as const },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [categories, products] = await Promise.all([
+  const [categories, products, articles] = await Promise.all([
     prisma.category.findMany({ select: { slug: true } }),
     prisma.product.findMany({
       where: { isPublished: true },
+      select: { slug: true, updatedAt: true },
+    }),
+    prisma.article.findMany({
+      where: { publishedAt: { not: null } },
       select: { slug: true, updatedAt: true },
     }),
   ]);
@@ -42,6 +47,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: product.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.7,
+    })),
+    ...articles.map((article) => ({
+      url: `${SITE_URL}/blog/${article.slug}`,
+      lastModified: article.updatedAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
     })),
   ];
 }

@@ -4,6 +4,7 @@ import { SamplesCounter } from "@/components/samples/SamplesCounter";
 const nav = [
   { href: "/catalog", label: "Каталог" },
   { href: "/calculator", label: "Калькулятор" },
+  { href: "/blog", label: "Блог" },
   { href: "/pro", label: "Дизайнерам и бригадам" },
   { href: "/about", label: "О компании" },
   { href: "/delivery", label: "Доставка и оплата" },
