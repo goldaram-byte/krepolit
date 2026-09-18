@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>КРЕПОЛИТ — CRM</title>
+<style>
+:root{--navy:#0f1b2d;--navy2:#16263d;--steel:#1f3a5f;--accent:#ff6a00;--accent-d:#e85d00;--line:#e4e9f0;
+--muted:#6c7889;--ink:#101623;--bg:#f4f6fa;--ok:#1a9d5a;--warn:#b45309;--danger:#dc2626;--radius:12px;}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button{font-family:inherit;cursor:pointer}input,select,textarea{font-family:inherit}
+a{color:inherit}
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#0f1b2d,#1f3a5f)}
+.login .box{background:#fff;border-radius:16px;padding:34px 32px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login h1{margin:0 0 4px;font-size:24px}.login .box small{color:var(--muted)}
+.login label{display:block;font-size:13px;color:var(--muted);margin:14px 0 5px}
+.login input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;font-size:15px}
+.login button{width:100%;margin-top:18px;background:var(--accent);color:#fff;border:none;border-radius:9px;padding:12px;font-weight:700;font-size:15px}
+.login .err{color:var(--danger);font-size:13px;margin-top:10px;min-height:16px}
+.login .hint{margin-top:16px;font-size:12px;color:var(--muted);line-height:1.5;border-top:1px solid var(--line);padding-top:12px}
+/* app */
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+.side{background:var(--navy);color:#c7d0dc;padding:16px 0;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{font-weight:900;font-size:20px;color:#fff;padding:6px 20px 2px}.brand i{color:var(--accent);font-style:normal}
+.brand small{display:block;font-size:11px;color:#7d8899;font-weight:500;letter-spacing:.5px}
+.nav{margin-top:16px}
+.nav a{display:flex;align-items:center;gap:10px;padding:11px 20px;color:#c7d0dc;font-size:14px;font-weight:600;border-left:3px solid transparent}
+.nav a:hover{background:var(--navy2)}.nav a.on{background:var(--navy2);color:#fff;border-left-color:var(--accent)}
+.nav a .b{margin-left:auto;background:var(--accent);color:#fff;border-radius:10px;padding:0 8px;font-size:11px}
+.me{padding:14px 20px;margin-top:14px;border-top:1px solid var(--navy2);font-size:13px}
+.me b{color:#fff;display:block}.me .role{color:#7d8899;font-size:12px}
+.me button{margin-top:8px;background:transparent;border:1px solid #33465e;color:#c7d0dc;border-radius:8px;padding:6px 10px;font-size:12px}
+.main{padding:22px 26px;overflow:auto}
+.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap}
+.head h2{margin:0;font-size:22px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:20px}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:15px 17px}
+.card b{font-size:24px;display:block}.card span{color:var(--muted);font-size:13px}
+.btn{border:none;border-radius:9px;padding:9px 15px;font-weight:700;font-size:14px;background:var(--accent);color:#fff}
+.btn:hover{background:var(--accent-d)}.btn.light{background:#fff;color:var(--navy);border:1px solid var(--line)}
+.btn.sm{padding:5px 10px;font-size:12px}.btn.danger{background:var(--danger)}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+th{background:var(--navy);color:#fff;text-align:left;padding:9px 11px;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+td{padding:8px 11px;border-top:1px solid var(--line);font-size:14px}
+tr:hover td{background:#fafbfe}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+input[type=text],input[type=number],input[type=email],input[type=password],select,textarea{padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:14px;background:#fff;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+.grow{flex:1;min-width:180px}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600}
+.st-new{background:#e8f0ff;color:#1d4ed8}.st-work{background:#fff3e0;color:var(--warn)}.st-done{background:#e7f7ee;color:var(--ok)}.st-lost{background:#fde8e8;color:var(--danger)}
+/* funnel */
+.funnel{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;align-items:start}
+.col{background:#eef1f6;border-radius:12px;padding:10px;min-height:120px}
+.col h4{margin:0 0 4px;font-size:13px}.col .sum{font-size:12px;color:var(--muted);margin-bottom:8px}
+.deal{background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 10px;margin-bottom:8px;font-size:13px}
+.deal b{display:block}.deal .m{color:var(--muted);font-size:12px;margin-top:3px}
+.deal select{margin-top:6px;width:100%;font-size:12px;padding:4px 6px}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(15,27,45,.55);display:none;place-items:center;z-index:50;padding:20px}
+.ov.on{display:grid}
+.modal{background:#fff;border-radius:14px;padding:22px 24px;width:min(560px,100%);max-height:90vh;overflow:auto}
+.modal h3{margin:0 0 14px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.f{display:flex;flex-direction:column;gap:5px}.f.full{grid-column:1/-1}
+.f label{font-size:13px;color:var(--muted)}
+.perms{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#f7f9fc;padding:12px;border-radius:10px}
+.perms label{display:flex;gap:7px;align-items:center;font-size:13px}
+.thumb{width:46px;height:46px;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#f4f6fa}
+.right{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.empty{color:var(--muted);text-align:center;padding:40px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:11px 18px;border-radius:10px;opacity:0;transition:.25s;z-index:99}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.pag{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}.pag button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:5px 10px;font-size:13px}.pag button.on{background:var(--navy);color:#fff}
+.itemrow{display:grid;grid-template-columns:1fr 70px 90px 30px;gap:8px;margin-bottom:6px;align-items:center}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="ov" id="ov"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const api = async (url, opt={}) => {
+  const r = await fetch('/api'+url, { headers:{'Content-Type':'application/json'}, credentials:'same-origin', ...opt });
+  if (r.status === 401) { ME=null; renderLogin(); throw new Error('401'); }
+  const d = await r.json().catch(()=>({}));
+  if (!r.ok) throw new Error(d.error || 'Ошибка');
+  return d;
+};
+const money = n => (Number(n)||0).toLocaleString('ru-RU',{maximumFractionDigits:2}) + ' ₽';
+const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const toast = m => { const t=$('#toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); };
+const openModal = html => { $('#modal').innerHTML = html; $('#ov').classList.add('on'); };
+const closeModal = () => $('#ov').classList.remove('on');
+$('#ov').onclick = e => { if (e.target.id==='ov') closeModal(); };
+const can = a => ME && (ME.role==='admin' || ME.perms?.[a]===true);
+const scopeAll = a => ME && (ME.role==='admin' || ME.perms?.[a]==='all');
+
+let ME = null, EMPLOYEES = [], VIEW = 'dash';
+
+// ---------- LOGIN ----------
+function renderLogin(err='') {
+  $('#root').innerHTML = `<div class="login"><form class="box" id="lf">
+    <h1>КРЕПО<i style="color:var(--accent);font-style:normal">ЛИТ</i></h1><small>CRM · вход в систему</small>
+    <label>Email</label><input type="email" id="le" value="admin@krepolit.ru" required>
+    <label>Пароль</label><input type="password" id="lp" value="" required>
+    <button type="submit">Войти</button><div class="err">${err}</div>
+    <div class="hint">Демо-доступ:<br>админ — admin@krepolit.ru / admin123<br>менеджер — smirnov@krepolit.ru / manager123</div>
+  </form></div>`;
+  $('#lf').onsubmit = async e => {
+    e.preventDefault();
+    try { ME = await api('/auth/login',{method:'POST',body:JSON.stringify({email:$('#le').value,password:$('#lp').value})}); boot(); }
+    catch(x){ renderLogin(x.message); }
+  };
+}
+
+// ---------- SHELL ----------
+let BADGE = { open:0, overdue:0 };
+const NAV = [
+  { id:'dash', label:'Дашборд', icon:'📊', show:()=>can('reports') },
+  { id:'funnel', label:'Воронка', icon:'🔻', show:()=>true },
+  { id:'orders', label:'Заказы', icon:'🧾', show:()=>true },
+  { id:'clients', label:'Клиенты', icon:'👥', show:()=>true },
+  { id:'tasks', label:'Задачи', icon:'✅', show:()=>true, badge:()=>BADGE.open },
+  { id:'catalog', label:'Каталог', icon:'📦', show:()=>true },
+  { id:'staff', label:'Сотрудники', icon:'🛡️', show:()=>can('employees') },
+];
+function shell() {
+  const items = NAV.filter(n=>n.show()).map(n=>{const bc=n.badge?n.badge():0;return `<a data-v="${n.id}" class="${VIEW===n.id?'on':''}">${n.icon} ${n.label}${bc?`<span class="b">${bc}</span>`:''}</a>`;}).join('');
+  $('#root').innerHTML = `<div class="app">
+    <aside class="side"><div class="brand">КРЕПО<i>ЛИТ</i><small>CRM</small></div>
+      <nav class="nav">${items}</nav>
+      <div class="me"><b>${esc(ME.name)}</b><div class="role">${ME.role==='admin'?'Администратор':'Менеджер'}</div>
+        <button id="logout">Выйти</button></div>
+    </aside><main class="main" id="main"></main></div>`;
+  document.querySelectorAll('.nav a').forEach(a=>a.onclick=()=>{ VIEW=a.dataset.v; shell(); route(); });
+  $('#logout').onclick = async ()=>{ await api('/auth/logout',{method:'POST'}); ME=null; renderLogin(); };
+  route();
+}
+function route(){ ({dash:vDash,funnel:vFunnel,orders:vOrders,clients:vClients,tasks:vTasks,catalog:vCatalog,staff:vStaff}[VIEW]||vFunnel)(); }
+async function refreshBadge(){ try{ BADGE=await api('/tasks/badge'); document.querySelectorAll('.nav a').forEach(a=>{ if(a.dataset.v==='tasks'){ const n=NAV.find(x=>x.id==='tasks'); a.innerHTML=`✅ Задачи${BADGE.open?`<span class="b">${BADGE.open}</span>`:''}`; }}); }catch{} }
+const mgrOptions = (sel) => `<option value="">— менеджер —</option>` +
+  EMPLOYEES.map(e=>`<option value="${e.id}" ${sel==e.id?'selected':''}>${esc(e.name)}</option>`).join('');
+
+// ---------- DASHBOARD ----------
+async function vDash(){
+  const m=$('#main'); m.innerHTML='<div class="head"><h2>Дашборд</h2></div><div id="d">Загрузка…</div>';
+  const d = await api('/reports/dashboard'); const t=d.totals;
+  $('#d').innerHTML = `
+    <div class="cards">
+      <div class="card"><b>${t.clients}</b><span>клиентов</span></div>
+      <div class="card"><b>${t.deals}</b><span>сделок в воронке</span></div>
+      <div class="card"><b>${t.orders}</b><span>заказов</span></div>
+      <div class="card"><b>${money(t.revenue)}</b><span>выручка (отгружено)</span></div>
+      <div class="card"><b>${money(t.wonAmount)}</b><span>выиграно сделок</span></div>
+      <div class="card"><b>${t.products.toLocaleString('ru-RU')}</b><span>товаров · ср. ${money(t.avgPrice)}</span></div>
+    </div>
+    <h3>Воронка продаж</h3>
+    <table><thead><tr><th>Этап</th><th>Сделок</th><th>Сумма</th></tr></thead><tbody>
+      ${d.funnel.map(f=>`<tr><td>${f.label}</td><td>${f.count}</td><td>${money(f.amount)}</td></tr>`).join('')}</tbody></table>
+    <h3 style="margin-top:22px">Заказы по статусам</h3>
+    <table><thead><tr><th>Статус</th><th>Кол-во</th><th>Сумма</th></tr></thead><tbody>
+      ${d.ordersByStatus.map(o=>`<tr><td>${o.label}</td><td>${o.count}</td><td>${money(o.total)}</td></tr>`).join('')}</tbody></table>
+    <h3 style="margin-top:22px">По менеджерам</h3>
+    <table><thead><tr><th>Менеджер</th><th>Клиенты</th><th>Сделки</th><th>Заказы</th><th>Выручка</th><th>Выиграно</th></tr></thead><tbody>
+      ${d.byManager.map(x=>`<tr><td>${esc(x.manager)}</td><td>${x.clients}</td><td>${x.deals}</td><td>${x.orders}</td><td>${money(x.revenue)}</td><td>${money(x.won)}</td></tr>`).join('')}</tbody></table>`;
+}
+
+// ---------- FUNNEL (kanban) ----------
+const STAGES=[['new','Новая'],['contact','Контакт'],['offer','КП отправлено'],['negotiation','Переговоры'],['won','Сделка'],['lost','Отказ']];
+async function vFunnel(){
+  const m=$('#main');
+  m.innerHTML=`<div class="head"><h2>Воронка продаж</h2><button class="btn" id="add">+ Сделка</button></div><div class="funnel" id="f">Загрузка…</div>`;
+  $('#add').onclick=()=>dealForm();
+  const deals = await api('/deals');
+  $('#f').innerHTML = STAGES.map(([st,lbl])=>{
+    const list=deals.filter(d=>d.stage===st);
+    const sum=list.reduce((s,d)=>s+(+d.amount||0),0);
+    return `<div class="col"><h4>${lbl}</h4><div class="sum">${list.length} · ${money(sum)}</div>${
+      list.map(d=>`<div class="deal"><b>${esc(d.title)} ${d.source==='сайт'?'<span class="badge st-new" style="font-size:10px">🌐 сайт</span>':''}</b>
+        <div class="m">${esc(d.client||'—')} · ${money(d.amount)}</div>
+        <div class="m">👤 ${esc(d.manager||'—')}</div>
+        <select data-move="${d.id}">${STAGES.map(([s2,l2])=>`<option value="${s2}" ${s2===st?'selected':''}>${l2}</option>`).join('')}</select>
+        <div style="margin-top:6px;display:flex;gap:6px"><button class="btn sm light" data-edit="${d.id}">✎</button><button class="btn sm danger" data-del="${d.id}">✕</button></div>
+      </div>`).join('')||'<div class="empty" style="padding:14px;font-size:12px">пусто</div>'}</div>`;
+  }).join('');
+  document.querySelectorAll('[data-move]').forEach(s=>s.onchange=async()=>{ await api('/deals/'+s.dataset.move,{method:'PUT',body:JSON.stringify({stage:s.value})}); toast('Этап обновлён'); vFunnel(); });
+  document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>dealForm(deals.find(d=>d.id==b.dataset.edit)));
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{ if(confirm('Удалить сделку?')){ await api('/deals/'+b.dataset.del,{method:'DELETE'}); vFunnel(); }});
+}
+async function dealForm(d){
+  const clients = await api('/clients');
+  const cOpts = `<option value="">— клиент —</option>`+clients.map(c=>`<option value="${c.id}" ${d&&d.client_id==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  openModal(`<h3>${d?'Сделка':'Новая сделка'}</h3>
+    <div class="frow"><div class="f full"><label>Название</label><input type="text" id="dt" value="${d?esc(d.title):''}"></div>
+      <div class="f"><label>Клиент</label><select id="dc">${cOpts}</select></div>
+      <div class="f"><label>Менеджер</label><select id="dm" ${scopeAll('deals')?'':'disabled'}>${mgrOptions(d?d.manager_id:ME.id)}</select></div>
+      <div class="f"><label>Сумma, ₽</label><input type="number" id="da" value="${d?d.amount:0}"></div>
+      <div class="f"><label>Этап</label><select id="ds">${STAGES.map(([s,l])=>`<option value="${s}" ${d&&d.stage===s?'selected':''}>${l}</option>`).join('')}</select></div>
+      <div class="f full"><label>Заметка</label><textarea id="dn">${d?esc(d.note||''):''}</textarea></div></div>
+    ${d?'<div id="tl"></div>':''}
+    <div class="right">${d?`<button class="btn light" id="dtask">+ Задача</button>`:''}<button class="btn light" onclick="closeModal()">Отмена</button><button class="btn" id="save">Сохранить</button></div>`);
+  if(d){ timelineHtml('deal_id='+d.id).then(h=>{ $('#tl').innerHTML=h; wireTimeline({deal_id:d.id,client_id:d.client_id}); });
+    $('#dtask').onclick=()=>taskForm({deal_id:d.id,client_id:d.client_id}); }
+  $('#save').onclick=async()=>{
+    const body={title:$('#dt').value,client_id:+$('#dc').value||null,manager_id:+$('#dm').value||null,amount:+$('#da').value,stage:$('#ds').value,note:$('#dn').value};
+    if(!body.title) return toast('Введите название');
+    try{ await api(d?'/deals/'+d.id:'/deals',{method:d?'PUT':'POST',body:JSON.stringify(body)}); closeModal(); toast('Сохранено'); vFunnel(); }catch(x){toast(x.message);} };
+}
+
+// ---------- CLIENTS ----------
+async function vClients(){
+  const m=$('#main');
+  m.innerHTML=`<div class="head"><h2>Клиенты</h2><div style="display:flex;gap:8px">
+    <a class="btn light" href="/api/export/clients.csv">⬇ CSV</a><button class="btn" id="add">+ Клиент</button></div></div><div id="c">Загрузка…</div>`;
+  $('#add').onclick=()=>clientForm();
+  const rows=await api('/clients');
+  $('#c').innerHTML = rows.length? `<table><thead><tr><th>Клиент</th><th>Компания</th><th>Телефон</th><th>ИНН</th><th>Менеджер</th><th></th></tr></thead><tbody>${
+    rows.map(c=>`<tr><td><b>${esc(c.name)}</b><div style="color:var(--muted);font-size:12px">${esc(c.email||'')}</div></td>
+      <td>${esc(c.company||'')}</td><td>${esc(c.phone||'')}</td><td>${esc(c.inn||'')}</td><td>${esc(c.manager||'—')}</td>
+      <td style="white-space:nowrap"><button class="btn sm light" data-e="${c.id}">✎</button> <button class="btn sm danger" data-d="${c.id}">✕</button></td></tr>`).join('')}</tbody></table>`
+    :'<div class="empty">Пока нет клиентов.</div>';
+  document.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>clientForm(rows.find(c=>c.id==b.dataset.e)));
+  document.querySelectorAll('[data-d]').forEach(b=>b.onclick=async()=>{ if(confirm('Удалить клиента?')){ await api('/clients/'+b.dataset.d,{method:'DELETE'}); vClients(); }});
+}
+function clientForm(c){
+  openModal(`<h3>${c?'Клиент':'Новый клиент'}</h3>
+    <div class="frow"><div class="f"><label>Имя *</label><input type="text" id="cn" value="${c?esc(c.name):''}"></div>
+      <div class="f"><label>Компания</label><input type="text" id="cc" value="${c?esc(c.company||''):''}"></div>
+      <div class="f"><label>Телефон</label><input type="text" id="cp" value="${c?esc(c.phone||''):''}"></div>
+      <div class="f"><label>Email</label><input type="email" id="ce" value="${c?esc(c.email||''):''}"></div>
+      <div class="f"><label>ИНН</label><input type="text" id="ci" value="${c?esc(c.inn||''):''}"></div>
+      <div class="f"><label>Менеджер</label><select id="cm" ${scopeAll('clients')?'':'disabled'}>${mgrOptions(c?c.manager_id:ME.id)}</select></div>
+      <div class="f full"><label>Заметки</label><textarea id="cnotes">${c?esc(c.notes||''):''}</textarea></div></div>
+    ${c?'<div id="tl"></div>':''}
+    <div class="right">${c?`<button class="btn light" id="ctask">+ Задача</button>`:''}<button class="btn light" onclick="closeModal()">Отмена</button><button class="btn" id="save">Сохранить</button></div>`);
+  if(c){ timelineHtml('client_id='+c.id).then(h=>{ $('#tl').innerHTML=h; wireTimeline({client_id:c.id}); });
+    $('#ctask').onclick=()=>taskForm({client_id:c.id}); }
+  $('#save').onclick=async()=>{
+    const body={name:$('#cn').value,company:$('#cc').value,phone:$('#cp').value,email:$('#ce').value,inn:$('#ci').value,manager_id:+$('#cm').value||null,notes:$('#cnotes').value};
+    if(!body.name) return toast('Введите имя');
+    try{ await api(c?'/clients/'+c.id:'/clients',{method:c?'PUT':'POST',body:JSON.stringify(body)}); closeModal(); toast('Сохранено'); vClients(); }catch(x){toast(x.message);} };
+}
+
+// ---------- TASKS ----------
+const dt = s => s ? new Date(s.replace(' ','T')).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+const overdue = s => s && new Date(s.replace(' ','T')) < new Date();
+async function vTasks(){
+  const m=$('#main');
+  const scopeAll2 = can('employees');
+  m.innerHTML=`<div class="head"><h2>Задачи и напоминания</h2><div style="display:flex;gap:8px">
+    ${scopeAll2?`<label style="font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px"><input type="checkbox" id="tall"> все сотрудники</label>`:''}
+    <button class="btn" id="add">+ Задача</button></div></div><div id="t">Загрузка…</div>`;
+  $('#add').onclick=()=>taskForm();
+  const load=async()=>{
+    const all = scopeAll2 && $('#tall')?.checked ? '&scope=all' : '';
+    const rows=await api('/tasks?1=1'+all);
+    $('#t').innerHTML = rows.length? `<table><thead><tr><th></th><th>Задача</th><th>Срок</th><th>Клиент/Сделка</th>${scopeAll2?'<th>Сотрудник</th>':''}<th></th></tr></thead><tbody>${
+      rows.map(t=>`<tr style="${t.done?'opacity:.5':''}"><td><input type="checkbox" data-done="${t.id}" ${t.done?'checked':''}></td>
+        <td ${t.done?'style="text-decoration:line-through"':''}>${esc(t.title)}</td>
+        <td style="${!t.done&&overdue(t.due_at)?'color:var(--danger);font-weight:700':''}">${t.due_at?dt(t.due_at):'—'}</td>
+        <td style="font-size:12px;color:var(--muted)">${esc(t.client||t.deal||'')}</td>
+        ${scopeAll2?`<td>${esc(t.employee||'')}</td>`:''}
+        <td><button class="btn sm danger" data-del="${t.id}">✕</button></td></tr>`).join('')}</tbody></table>`
+      :'<div class="empty">Нет задач.</div>';
+    document.querySelectorAll('[data-done]').forEach(c=>c.onchange=async()=>{ await api('/tasks/'+c.dataset.done,{method:'PUT',body:JSON.stringify({done:c.checked})}); refreshBadge(); load(); });
+    document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{ await api('/tasks/'+b.dataset.del,{method:'DELETE'}); refreshBadge(); load(); });
+  };
+  if($('#tall')) $('#tall').onchange=load;
+  load();
+}
+function taskForm(ctx){ // ctx: {client_id, deal_id} optional
+  openModal(`<h3>Новая задача</h3><div class="frow">
+    <div class="f full"><label>Что сделать</label><input type="text" id="tt" placeholder="Например: перезвонить клиенту"></div>
+    <div class="f"><label>Срок</label><input type="datetime-local" id="td"></div>
+    ${can('employees')?`<div class="f"><label>Исполнитель</label><select id="te">${mgrOptions(ME.id)}</select></div>`:''}</div>
+    <div class="right"><button class="btn light" onclick="closeModal()">Отмена</button><button class="btn" id="save">Создать</button></div>`);
+  $('#save').onclick=async()=>{
+    const body={title:$('#tt').value,due_at:$('#td').value?$('#td').value.replace('T',' ')+':00':null,client_id:ctx?.client_id,deal_id:ctx?.deal_id};
+    if($('#te'))body.employee_id=+$('#te').value||null;
+    if(!body.title) return toast('Введите задачу');
+    try{ await api('/tasks',{method:'POST',body:JSON.stringify(body)}); closeModal(); toast('Задача создана'); refreshBadge(); if(VIEW==='tasks')vTasks(); }catch(x){toast(x.message);} };
+}
+// Лента активности + быстрая заметка (для карточек клиента/сделки)
+async function timelineHtml(q){
+  const acts = await api('/activities?'+q).catch(()=>[]);
+  const TYPE={note:'📝',call:'📞',stage:'🔻',order:'🧾',lead:'🌐',task:'✅'};
+  return `<div style="margin-top:14px"><label style="font-size:13px;color:var(--muted)">История</label>
+    <div style="display:flex;gap:8px;margin:6px 0"><input type="text" id="actxt" class="grow" placeholder="Добавить заметку / звонок…"><button class="btn sm" id="actadd">+</button></div>
+    <div id="acts" style="max-height:180px;overflow:auto">${acts.map(a=>`<div class="deal"><b>${TYPE[a.type]||'•'} ${esc(a.text||'')}</b><div class="m">${esc(a.employee||'')} · ${dt(a.created_at)}</div></div>`).join('')||'<div style="color:var(--muted);font-size:13px">Пока пусто</div>'}</div></div>`;
+}
+function wireTimeline(ctx){
+  const add=$('#actadd'); if(!add) return;
+  add.onclick=async()=>{ const t=$('#actxt').value.trim(); if(!t)return; await api('/activities',{method:'POST',body:JSON.stringify({...ctx,text:t,type:'note'})}); $('#actxt').value=''; toast('Записано'); };
+}
+
+// ---------- ORDERS ----------
+const OSTAT=[['new','Новый'],['processing','В работе'],['shipped','Отгружен'],['done','Завершён'],['canceled','Отменён']];
+async function vOrders(){
+  const m=$('#main');
+  m.innerHTML=`<div class="head"><h2>Заказы</h2><div style="display:flex;gap:8px">
+    <a class="btn light" href="/api/export/orders.csv">⬇ CSV</a><button class="btn" id="add">+ Оформить заказ</button></div></div><div id="o">Загрузка…</div>`;
+  $('#add').onclick=()=>orderForm();
+  const rows=await api('/orders');
+  $('#o').innerHTML = rows.length? `<table><thead><tr><th>№</th><th>Клиент</th><th>Менеджер</th><th>Позиций</th><th>Сумма</th><th>Статус</th><th></th></tr></thead><tbody>${
+    rows.map(o=>`<tr><td><b>${o.number}</b></td><td>${esc(o.client||'—')}</td><td>${esc(o.manager||'—')}</td><td>${o.items.length}</td><td>${money(o.total)}</td>
+      <td><select data-s="${o.id}">${OSTAT.map(([s,l])=>`<option value="${s}" ${o.status===s?'selected':''}>${l}</option>`).join('')}</select></td>
+      <td style="white-space:nowrap"><a class="btn sm light" href="/api/export/order/${o.id}/doc?type=kp" target="_blank" title="Коммерческое предложение">КП</a>
+        <a class="btn sm light" href="/api/export/order/${o.id}/doc?type=invoice" target="_blank" title="Счёт">Счёт</a>
+        <button class="btn sm light" data-e="${o.id}">✎</button> <button class="btn sm danger" data-d="${o.id}">✕</button></td></tr>`).join('')}</tbody></table>`
+    :'<div class="empty">Пока нет заказов.</div>';
+  document.querySelectorAll('[data-s]').forEach(s=>s.onchange=async()=>{ await api('/orders/'+s.dataset.s,{method:'PUT',body:JSON.stringify({status:s.value})}); toast('Статус обновлён'); });
+  document.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>orderForm(rows.find(o=>o.id==b.dataset.e)));
+  document.querySelectorAll('[data-d]').forEach(b=>b.onclick=async()=>{ if(confirm('Удалить заказ?')){ await api('/orders/'+b.dataset.d,{method:'DELETE'}); vOrders(); }});
+}
+async function orderForm(o){
+  const clients=await api('/clients');
+  const cOpts=`<option value="">— клиент —</option>`+clients.map(c=>`<option value="${c.id}" ${o&&o.client_id==c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  let items = o? JSON.parse(JSON.stringify(o.items)) : [];
+  openModal(`<h3>${o?('Заказ '+o.number):'Оформление заказа'}</h3>
+    <div class="frow"><div class="f"><label>Клиент</label><select id="oc">${cOpts}</select></div>
+      <div class="f"><label>Менеджер</label><select id="om" ${scopeAll('orders')?'':'disabled'}>${mgrOptions(o?o.manager_id:ME.id)}</select></div></div>
+    <div class="f full" style="margin-bottom:10px"><label>Добавить товар (поиск по названию/артикулу)</label>
+      <input type="text" id="osrch" placeholder="начните вводить…"><div id="osugg"></div></div>
+    <div id="oitems"></div>
+    <div style="text-align:right;font-weight:700;margin:8px 0" id="ototal"></div>
+    <div class="f full"><label>Комментарий</label><textarea id="ocom">${o?esc(o.comment||''):''}</textarea></div>
+    <div class="right"><button class="btn light" onclick="closeModal()">Отмена</button><button class="btn" id="save">Сохранить</button></div>`);
+  const rowsEl=$('#oitems'), totEl=$('#ototal');
+  function draw(){
+    rowsEl.innerHTML = items.map((it,i)=>`<div class="itemrow"><span>${esc(it.name)}</span>
+      <input type="number" min="1" value="${it.qty}" data-q="${i}"><span>${money(it.price)}</span>
+      <button class="btn sm danger" data-rm="${i}">✕</button></div>`).join('')||'<div style="color:var(--muted);font-size:13px">Нет позиций</div>';
+    totEl.textContent='Итого: '+money(items.reduce((s,i)=>s+i.price*i.qty,0));
+    rowsEl.querySelectorAll('[data-q]').forEach(inp=>inp.onchange=()=>{ items[inp.dataset.q].qty=+inp.value||1; draw(); });
+    rowsEl.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ items.splice(+b.dataset.rm,1); draw(); });
+  }
+  draw();
+  let tmr; $('#osrch').oninput=e=>{ clearTimeout(tmr); const q=e.target.value.trim(); if(q.length<2){$('#osugg').innerHTML='';return;}
+    tmr=setTimeout(async()=>{ const d=await api('/products?limit=6&q='+encodeURIComponent(q));
+      $('#osugg').innerHTML=d.rows.map(p=>`<div class="deal" style="cursor:pointer" data-add='${esc(JSON.stringify({name:p.name,art:p.art,price:p.price,unit:p.unit}))}'>${esc(p.name)} — ${money(p.price)}/${esc(p.unit)}</div>`).join('');
+      $('#osugg').querySelectorAll('[data-add]').forEach(el=>el.onclick=()=>{ const p=JSON.parse(el.dataset.add); items.push({...p,qty:1}); $('#osrch').value=''; $('#osugg').innerHTML=''; draw(); });
+    },250); };
+  $('#save').onclick=async()=>{
+    const body={client_id:+$('#oc').value||null,manager_id:+$('#om').value||null,items,comment:$('#ocom').value,status:o?o.status:'new'};
+    try{ await api(o?'/orders/'+o.id:'/orders',{method:o?'PUT':'POST',body:JSON.stringify(body)}); closeModal(); toast('Заказ сохранён'); vOrders(); }catch(x){toast(x.message);} };
+}
+
+// ---------- CATALOG ----------
+let CAT_PAGE=0, CAT_Q='', CAT_G='';
+async function vCatalog(){
+  const m=$('#main');
+  const gr=await api('/products/groups');
+  m.innerHTML=`<div class="head"><h2>Каталог</h2></div>
+    <div class="toolbar"><input type="text" class="grow" id="cq" placeholder="Поиск: наименование / артикул" value="${esc(CAT_Q)}">
+      <select id="cg"><option value="">Все группы</option>${gr.groups.map(g=>`<option value="${g.id}" ${CAT_G===g.id?'selected':''}>${esc(g.name)}</option>`).join('')}</select>
+      <span id="cinfo" style="color:var(--muted);font-size:13px"></span></div>
+    <div id="ct">Загрузка…</div><div class="pag" id="cp"></div>`;
+  const load=async()=>{
+    const d=await api(`/products?limit=40&offset=${CAT_PAGE*40}&q=${encodeURIComponent(CAT_Q)}&grp=${CAT_G}`);
+    $('#cinfo').textContent=d.total.toLocaleString('ru-RU')+' поз.';
+    $('#ct').innerHTML=`<table><thead><tr><th>Фото</th><th>Наименование</th><th>Артикул</th><th>Ед.</th><th>Цена</th>${can('catalog')?'<th></th>':''}</tr></thead><tbody>${
+      d.rows.map(p=>`<tr><td>${p.image?`<img class="thumb" src="/uploads/${esc(p.image)}" onerror="this.src='';this.style.background='#eef'">`:`<div class="thumb"></div>`}</td>
+        <td>${esc(p.name)}</td><td style="color:var(--muted);font-size:12px">${esc(p.art||'')}</td><td>${esc(p.unit||'')}</td><td><b>${money(p.price)}</b></td>
+        ${can('catalog')?`<td style="white-space:nowrap"><button class="btn sm light" data-edit='${esc(JSON.stringify({id:p.id,name:p.name,price:p.price,unit:p.unit,art:p.art,image:p.image}))}'>✎</button>
+          <button class="btn sm" data-img="${p.id}">🖼 фото</button></td>`:''}</tr>`).join('')}</tbody></table>`;
+    const pages=Math.ceil(d.total/40); let h='';
+    for(let n=Math.max(0,CAT_PAGE-2);n<Math.min(pages,CAT_PAGE+3);n++) h+=`<button class="${n===CAT_PAGE?'on':''}" data-p="${n}">${n+1}</button>`;
+    $('#cp').innerHTML=pages>1?h:'';
+    $('#cp').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{CAT_PAGE=+b.dataset.p;load();window.scrollTo(0,0);});
+    if(can('catalog')){
+      document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>prodForm(JSON.parse(b.dataset.edit)));
+      document.querySelectorAll('[data-img]').forEach(b=>b.onclick=()=>imgForm(b.dataset.img));
+    }
+  };
+  let t; $('#cq').oninput=e=>{ clearTimeout(t); t=setTimeout(()=>{CAT_Q=e.target.value;CAT_PAGE=0;load();},300); };
+  $('#cg').onchange=e=>{CAT_G=e.target.value;CAT_PAGE=0;load();};
+  load();
+}
+function prodForm(p){
+  openModal(`<h3>Товар</h3><div class="frow">
+    <div class="f full"><label>Наименование</label><input type="text" id="pn" value="${esc(p.name)}"></div>
+    <div class="f"><label>Артикул</label><input type="text" id="pa" value="${esc(p.art||'')}"></div>
+    <div class="f"><label>Ед.</label><input type="text" id="pu" value="${esc(p.unit||'')}"></div>
+    <div class="f"><label>Цена, ₽</label><input type="number" step="0.01" id="pp" value="${p.price}"></div></div>
+    <div class="right"><button class="btn light" onclick="closeModal()">Отмена</button><button class="btn" id="save">Сохранить</button></div>`);
+  $('#save').onclick=async()=>{ try{ await api('/products/'+p.id,{method:'PUT',body:JSON.stringify({name:$('#pn').value,art:$('#pa').value,unit:$('#pu').value,price:+$('#pp').value})}); closeModal(); toast('Сохранено'); vCatalog(); }catch(x){toast(x.message);} };
+}
+async function imgForm(id){
+  openModal(`<h3>Фото товара</h3><div id="gal">Загрузка…</div>
+    <div class="frow" style="margin-top:12px">
+      <div class="f"><label>Главное фото</label><input type="file" id="mf" accept="image/*"><button class="btn sm" id="mup" style="margin-top:6px">Загрузить главное</button></div>
+      <div class="f"><label>Доп. фото (галерея)</label><input type="file" id="gf" accept="image/*"><button class="btn sm" id="gup" style="margin-top:6px">Добавить в галерею</button></div></div>
+    <div class="right"><button class="btn light" onclick="closeModal()">Закрыть</button></div>`);
+  async function draw(){
+    const d=await api('/products/'+id+'/gallery');
+    $('#gal').innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap">
+      ${d.main?`<div style="text-align:center"><img src="${d.main}" style="width:90px;height:90px;object-fit:cover;border-radius:10px;border:2px solid var(--accent)"><div style="font-size:11px">главное <button class="btn sm danger" id="delmain">✕</button></div></div>`:'<div style="color:var(--muted);font-size:13px">Главного фото нет</div>'}
+      ${d.gallery.map(g=>`<div style="text-align:center"><img src="${g.url}" style="width:90px;height:90px;object-fit:cover;border-radius:10px;border:1px solid var(--line)"><div><button class="btn sm danger" data-gd="${g.id}">✕</button></div></div>`).join('')}</div>`;
+    if($('#delmain'))$('#delmain').onclick=async()=>{ await api('/products/'+id+'/image',{method:'DELETE'}); draw(); vCatalog(); };
+    document.querySelectorAll('[data-gd]').forEach(b=>b.onclick=async()=>{ await api('/products/gallery/'+b.dataset.gd,{method:'DELETE'}); draw(); });
+  }
+  const up=async(inp,url)=>{ const f=$(inp).files[0]; if(!f)return toast('Выберите файл'); const fd=new FormData(); fd.append('image',f);
+    const r=await fetch(url,{method:'POST',body:fd,credentials:'same-origin'}); const d=await r.json(); if(!r.ok)return toast(d.error||'Ошибка'); toast('Загружено'); draw(); vCatalog(); };
+  $('#mup').onclick=()=>up('#mf','/api/products/'+id+'/image');
+  $('#gup').onclick=()=>up('#gf','/api/products/'+id+'/gallery');
+  draw();
+}
+
+// ---------- STAFF ----------
+const PERM_FIELDS=[['clients','Клиенты'],['deals','Воронка'],['orders','Заказы']];
+const PERM_FLAGS=[['catalog','Редактировать каталог'],['reports','Отчёты/дашборд'],['employees','Управление сотрудниками']];
+async function vStaff(){
+  const m=$('#main');
+  m.innerHTML=`<div class="head"><h2>Сотрудники</h2><button class="btn" id="add">+ Сотрудник</button></div><div id="s">Загрузка…</div>`;
+  $('#add').onclick=()=>staffForm();
+  const rows=await api('/employees'); EMPLOYEES=rows.map(e=>({id:e.id,name:e.name}));
+  $('#s').innerHTML=`<table><thead><tr><th>Имя</th><th>Email</th><th>Роль</th><th>Доступ</th><th>Активен</th><th></th></tr></thead><tbody>${
+    rows.map(e=>{const p=e.perms||{};const acc=e.role==='admin'?'полный':PERM_FIELDS.map(([k,l])=>`${l}:${p[k]==='all'?'все':'свои'}`).concat(PERM_FLAGS.filter(([k])=>p[k]).map(([k,l])=>l)).join(', ');
+      return `<tr><td><b>${esc(e.name)}</b></td><td>${esc(e.email)}</td><td>${e.role==='admin'?'Админ':'Менеджер'}</td>
+        <td style="font-size:12px;color:var(--muted)">${esc(acc)}</td><td>${e.active?'✅':'⛔'}</td>
+        <td style="white-space:nowrap"><button class="btn sm light" data-e="${e.id}">✎</button> ${e.id!==ME.id?`<button class="btn sm danger" data-d="${e.id}">✕</button>`:''}</td></tr>`;}).join('')}</tbody></table>`;
+  document.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>staffForm(rows.find(e=>e.id==b.dataset.e)));
+  document.querySelectorAll('[data-d]').forEach(b=>b.onclick=async()=>{ if(confirm('Удалить сотрудника?')){ await api('/employees/'+b.dataset.d,{method:'DELETE'}); vStaff(); }});
+}
+function staffForm(e){
+  const p=e?.perms||{};
+  openModal(`<h3>${e?'Сотрудник':'Новый сотрудник'}</h3>
+    <div class="frow"><div class="f"><label>Имя *</label><input type="text" id="sn" value="${e?esc(e.name):''}"></div>
+      <div class="f"><label>Email *</label><input type="email" id="se" value="${e?esc(e.email):''}"></div>
+      <div class="f"><label>${e?'Новый пароль':'Пароль *'}</label><input type="password" id="sp" placeholder="${e?'оставьте пустым':''}"></div>
+      <div class="f"><label>Роль</label><select id="sr"><option value="manager" ${e?.role!=='admin'?'selected':''}>Менеджер</option><option value="admin" ${e?.role==='admin'?'selected':''}>Администратор</option></select></div></div>
+    <div id="pw"><label style="font-size:13px;color:var(--muted)">Права менеджера</label>
+    <div class="perms">${PERM_FIELDS.map(([k,l])=>`<label>${l}: <select data-p="${k}"><option value="own" ${p[k]!=='all'?'selected':''}>только свои</option><option value="all" ${p[k]==='all'?'selected':''}>все</option></select></label>`).join('')}
+      ${PERM_FLAGS.map(([k,l])=>`<label><input type="checkbox" data-f="${k}" ${p[k]?'checked':''}> ${l}</label>`).join('')}</div></div>
+    <div class="right"><button class="btn light" onclick="closeModal()">Отмена</button><button class="btn" id="save">Сохранить</button></div>`);
+  const syncRole=()=>{ $('#pw').style.display=$('#sr').value==='admin'?'none':'block'; };
+  $('#sr').onchange=syncRole; syncRole();
+  $('#save').onclick=async()=>{
+    const perms={}; document.querySelectorAll('[data-p]').forEach(s=>perms[s.dataset.p]=s.value);
+    document.querySelectorAll('[data-f]').forEach(c=>perms[c.dataset.f]=c.checked);
+    const body={name:$('#sn').value,email:$('#se').value,role:$('#sr').value,perms}; const pw=$('#sp').value; if(pw)body.password=pw;
+    if(!body.name||!body.email) return toast('Имя и email обязательны');
+    if(!e&&!pw) return toast('Задайте пароль');
+    try{ await api(e?'/employees/'+e.id:'/employees',{method:e?'PUT':'POST',body:JSON.stringify(body)}); closeModal(); toast('Сохранено'); vStaff(); }catch(x){toast(x.message);} };
+}
+
+// ---------- BOOT ----------
+async function boot(){
+  try{ if(can('employees')){ const emp=await api('/employees'); EMPLOYEES=emp.map(e=>({id:e.id,name:e.name})); } else { EMPLOYEES=[{id:ME.id,name:ME.name}]; } }catch{ EMPLOYEES=[{id:ME.id,name:ME.name}]; }
+  VIEW = can('reports')?'dash':'funnel';
+  shell();
+  refreshBadge();
+}
+(async()=>{ try{ ME=await api('/auth/me'); boot(); }catch{ renderLogin(); } })();
+</script>
+</body>
+</html>

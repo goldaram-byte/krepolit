@@ -1,0 +1,20 @@
+{
+  "name": "krepolit-crm",
+  "version": "1.0.0",
+  "description": "КРЕПОЛИТ — backend CRM (каталог, воронка, заказы, клиенты, сотрудники, отчёты)",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "seed": "node seed.js",
+    "import": "node import_catalog.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "better-sqlite3": "^11.8.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "cookie-parser": "^1.4.7"
+  }
+}

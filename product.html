@@ -79,12 +79,12 @@ if(!p){
   <div class="tabs">
     <div class="tabnav"><button class="on" data-tab="desc">Описание</button><button data-tab="spec">Характеристики</button><button data-tab="pay">Доставка и оплата</button></div>
     <div class="tabpane on" id="tab-desc">
-      <p><b>${p.name}</b> — ${p.desc}. Применяется для монтажных, строительных и производственных работ. Продукция сертифицирована и всегда есть на складе КРЕПОЛИТ в Москве.</p>
-      <p>Отгружаем оптом и в розницу. Для оптовых заказов действуют специальные цены и отсрочка платежа — уточните у менеджера по телефону 8 800 555-24-70.</p>
+      <p><b>${p.name}</b> — ${p.desc}. Применяется для монтажных, строительных и производственных работ. Продукция сертифицирована и всегда есть на складе КРЕПОЛИТ в Королёве.</p>
+      <p>Отгружаем оптом и в розницу. Для оптовых заказов действуют специальные цены и отсрочка платежа — уточните у менеджера по телефону +7 909 933 24 64.</p>
     </div>
     <div class="tabpane" id="tab-spec"><table class="spectable"><tbody>${specs}</tbody></table></div>
     <div class="tabpane" id="tab-pay">
-      <p><b>Доставка:</b> по Москве собственным транспортом от 490 ₽ (бесплатно при заказе от 30 000 ₽), по России — транспортными компаниями. Самовывоз со склада на ул. Складочная, 12.</p>
+      <p><b>Доставка:</b> по Москве собственным транспортом от 490 ₽ (бесплатно при заказе от 30 000 ₽), по России — транспортными компаниями. Самовывоз со склада на ул. Пионерская, 1а, стр. 2.</p>
       <p><b>Оплата:</b> наличными, картой, безналичный расчёт с НДС. Для юридических лиц — отсрочка платежа до 30 дней.</p>
     </div>
   </div>`;
@@ -108,6 +108,16 @@ if(!p){
   document.getElementById('related-sub').textContent = p.s ? ('Из подгруппы «'+SNAME[p.s]+'»') : ('Из группы «'+GNAME[p.g]+'»');
   document.getElementById('related').innerHTML = relList.map(productCard).join('');
   window.PAGE_REFRESH = ()=>{ document.getElementById('related').innerHTML = relList.map(productCard).join(''); };
+
+  // Фото, загруженные в админке (если backend доступен) — подставляем в галерею
+  fetch('/api/public/product/'+p.id+'/images').then(r=>r.json()).then(d=>{
+    if(!d.images || !d.images.length) return;
+    const main=document.querySelector('.pdp-main-img'), thumbs=document.querySelector('.pdp-thumbs');
+    const setMain=url=>{ main.querySelectorAll('img').forEach(x=>x.remove()); main.insertAdjacentHTML('beforeend', `<img class="pimg-photo" src="${url}" alt="${p.name.replace(/"/g,'')}">`); };
+    setMain(d.images[0]);
+    if(thumbs){ thumbs.innerHTML=d.images.map((u,i)=>`<div class="${i?'':'on'}" style="overflow:hidden"><img src="${u}" style="width:100%;height:100%;object-fit:cover"></div>`).join('');
+      thumbs.querySelectorAll('div').forEach((el,i)=>el.onclick=()=>{ setMain(d.images[i]); thumbs.querySelectorAll('div').forEach(x=>x.classList.remove('on')); el.classList.add('on'); }); }
+  }).catch(()=>{});
 }
 </script>
 </body>
