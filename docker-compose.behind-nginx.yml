@@ -1,0 +1,21 @@
+# Развёртывание krepolit за уже работающим nginx (когда 80/443 заняты другим сайтом).
+# Запускает ТОЛЬКО приложение на 127.0.0.1:3000 — внешний nginx проксирует на него
+# krepolit.ru и krepolit.online и выдаёт SSL (certbot). Caddy здесь не используется.
+#   docker compose -f docker-compose.behind-nginx.yml up -d --build
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      - PORT=3000
+      - DB_PATH=/app/data/krepolit.db
+      - JWT_SECRET=${JWT_SECRET:?Задайте JWT_SECRET в .env}
+    volumes:
+      - crm_data:/app/data
+      - crm_uploads:/app/uploads
+    ports:
+      - "127.0.0.1:3000:3000"   # доступно только локально, наружу отдаёт nginx
+
+volumes:
+  crm_data:
+  crm_uploads:
